@@ -1,0 +1,121 @@
+---
+title: "EDA"
+author: "Group 06"
+date: "January 17, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+# Clear environment
+rm(list = ls(all = TRUE))
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, error=FALSE, warning=FALSE)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+# check if package is installed, if not installed then load
+if(!require(here)){
+  install.packages("here")
+}
+library(here)
+
+if(!require(tidyverse)){
+  install.packages("tidyverse")
+}
+library(tidyverse)
+```
+
+```{r ReadData, echo=FALSE}
+#read data to variable Base
+base <- read_csv(here('raw_data','ss16pal.csv'))%>% 
+  select(SERIALNO, #Serial Number to link House Hold and Personal data
+         AGEP,  # Age: 0#99
+         CIT,   # Citizenship status
+         COW,   # Class of worker
+         DDRS,  # Self#care difficulty
+         DEAR,  # Hearing difficulty
+         DEYE,  # Vision difficulty
+         DOUT,  # Independent living difficulty
+         DPHY,  # Ambulatory difficulty
+         DRAT,  # Veteran service connected disability rating (percentage)
+         DRATX, # Veteran service connected disability rating (checkbox)
+         DREM,  # Cognitive difficulty
+         ENG,   # Ability to speak English
+         JWMNP, # Travel time to work
+         JWRIP, # Vehicle occupancy
+         JWTR,  # Means of transportation to work
+         MAR,   # Marital status
+         MIL,   # Military service
+         NWLK,  # Looking for work
+         SCHL,  # Educational attainment
+         SEMP,  # Self-employment income past 12 months (signed)
+         SEX,   # Sex
+         WAGP,  # Wages or salary income past 12 months
+         ESR,   # Employment status recode
+         HISP,  # Recoded detailed Hispanic origin
+         NATIVITY,  # Nativity
+         PERNP, # Total person's earnings
+         RAC1P, # Recoded detailed race code
+         RAC2P, # Recoded detailed race code
+         RAC3P, # Recoded detailed race code
+         RACAIAN, # American Indian and Alaska Native recode
+         RACASN,  # Asian recode
+         RACBLK,  # Black or African American recode
+         RACNH, # Native Hawaiian recode
+         RACWHT,  # White recode
+         WAOB,  # World area of birth
+         WKW)   #Weeks worked during past 12 months
+
+#some variables came as CHR and must be numeric
+base <- base %>% mutate(AGEP = as.numeric(AGEP),
+                        JWMNP = as.numeric(JWMNP),
+                        JWRIP = as.numeric(JWRIP),
+                        JWTR = as.numeric(JWTR),
+                        SCHL= as.numeric(SCHL),
+                        SEMP= as.numeric(SEMP),
+                        WAGP= as.numeric(WAGP),
+                        HISP= as.numeric(HISP),
+                        PERNP= as.numeric(PERNP),
+                        RAC2P= as.numeric(RAC2P),
+                        RAC3P = as.numeric(RAC3P)
+                        )
+
+#Link the house hould data
+househould <- read_csv(here('raw_data','ss16hal.csv'))%>% 
+  select(SERIALNO, #Serial Number to link House Hold and Personal data
+         TYPE, # Type of house
+         ACCESS, # Access to the Internet
+         BROADBND, # Cellular data plan for a smartphone or other mobile device
+         COMPOTHX, # Other computer equipment
+         HISPEED, #Broadband (high speed) Internet service such as cable, fiber optic, or DSL service
+         LAPTOP, # Laptop or desktop
+         OTHSVCEX, # Other Internet service
+         SATELLITE, # Satellite Internet service
+         SMARTPHONE, # Smartphone
+         TABLET # Tablet or other portable wireless computer
+  )
+base <- base %>% left_join(househould) %>% select(-SERIALNO)
+rm(househould)
+```
+
+# Exploratory data analysis
+
+Age:
+According to the graph and table below we see that our data includes people from 0 to 99 years old.
+```{r eda_age}
+base %>% select(AGEP) %>%  summary()
+base %>% ggplot(aes(AGEP)) + geom_histogram()  
+```
+
+We decided to work with people from 16 to 50 years olds as a better representations of the market labor
+```{r eda_age_filter}
+base <- base %>%  filter(AGEP>=16 & AGEP <= 50)
+base %>% select(AGEP) %>%  summary()
+base %>% ggplot(aes(AGEP)) + geom_density()  
+```
+
+Also, we decided to exclude people /n 
+  1. Working without pay in family business or farm
+  2. Unemployed and last worked 5 years ago or earlier or never worked
+```{r }
+base <- base %>%  filter(COW<8)
+
+table(base$WAGP)
+```
