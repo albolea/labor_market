@@ -2,7 +2,9 @@
 title: "EDA"
 author: "Group 06"
 date: "January 17, 2019"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 # step_1: clean the environment and import the library
 ```{r setup, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
@@ -21,7 +23,7 @@ if(!require(tidyverse)){
 }
 library(tidyverse)
 
-if(!require(tidyverse)){
+if(!require(DataExplorer)){
   install.packages("DataExplorer")
 }
 library(DataExplorer)
@@ -162,31 +164,3 @@ str(base)
 summary(base)
 ```
 
-
-
-
-
-# Exploratory data analysis
-
-Age:
-According to the graph and table below we see that our data includes people from 0 to 99 years old.
-```{r eda_age}
-base %>% select(AGEP) %>%  summary()
-base %>% ggplot(aes(AGEP)) + geom_histogram()  
-```
-
-We decided to work with people from 16 to 50 years olds as a better representations of the market labor
-```{r eda_age_filter}
-base <- base %>%  filter(AGEP>=16 & AGEP <= 50)
-base %>% select(AGEP) %>%  summary()
-base %>% ggplot(aes(AGEP)) + geom_density()  
-```
-
-Also, we decided to exclude people /n 
-  1. Working without pay in family business or farm
-  2. Unemployed and last worked 5 years ago or earlier or never worked
-```{r }
-base <- base %>%  filter(COW<8)
-
-table(base$WAGP)
-```
