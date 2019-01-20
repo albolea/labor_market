@@ -6,12 +6,15 @@ output:
   html_document: default
   pdf_document: default
 ---
-# step_1: clean the environment and import the library
+# Step_1: clean the environment and import the library
+* The loaded librariesin the code are:
+1. tidyverse
+2. here 
+3. DataExplorer
 ```{r setup, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 # Clear environment
 rm(list = ls(all = TRUE))
-knitr::opts_chunk$set(echo = FALSE, message=FALSE, error=FALSE, warning=FALSE)
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
 # check if package is installed, if not installed then load
 if(!require(here)){
   install.packages("here")
@@ -29,8 +32,10 @@ if(!require(DataExplorer)){
 library(DataExplorer)
 ```
 
-# step_2: import the raw data of ss16pal into the dataframe as "base"
-```{r}
+# Step_2: import the data
+* the two imported datasets will be merged in the dataframe of "base" on the variable of "SERIALNO" 
+1. import the ss16pal.csv
+```{r echo=TRUE, message=FALSE}
 #load the persional data to variable Base
 base <- read_csv(here('raw_data','ss16pal.csv'))%>% 
   select(SERIALNO, #Serial Number to link House Hold and Personal data
@@ -72,8 +77,8 @@ base <- read_csv(here('raw_data','ss16pal.csv'))%>%
          WKW)   #Weeks worked during past 12 months
 ```
 
-# step_3: import the raw data of ss16hal into the dataframe then merger it into "base"
-```{r}
+2. import the ss16hal.csv
+```{r echo=TRUE, message=FALSE}
 #Link the house hould data
 househould <- read_csv(here('raw_data','ss16hal.csv'))%>% 
   select(SERIALNO, #Serial Number to link House Hold and Personal data
@@ -88,19 +93,27 @@ househould <- read_csv(here('raw_data','ss16hal.csv'))%>%
          SMARTPHONE, # Smartphone
          TABLET # Tablet or other portable wireless computer
   )
+
+```
+
+3. merge the two datasets on "SERIALNO"
+```{r echo=TRUE, message=FALSE}
 base <- base %>% left_join(househould) %>% select(-SERIALNO)
 rm(househould)
 ```
 
-# step_4: a peek of data structure, then convert the data type accordingly.
-```{r}
+
+
+# Step_3: data struction of dataframe of "base"
+```{r message=FALSE}
 str(base)
 ```
 
 
-# step_5: convert the categorical data into factor type and numetical data into numeric type. The factorial data in this dataframe will keep its representative code instead of the category name to save the memory space. 
+# Step_4: convert the data
+* the categorical variables are in the 
+1. convert the following variables into factors
 ```{r}
-#conver the catagorical variable type
 base <- base %>% mutate(CIT = as.factor(CIT),
                         COW = as.factor(COW),
                         DDRS = as.factor(DDRS),
@@ -143,7 +156,9 @@ base <- base %>% mutate(CIT = as.factor(CIT),
                         TABLET = as.factor(TABLET)
                         )
 
-#conver the numeric variable type
+```
+2. convert the following variables into numeric
+```{r}
 base <- base %>% mutate(AGEP = as.numeric(AGEP),
                         JWMNP = as.numeric(JWMNP),
                         SEMP= as.numeric(SEMP),
@@ -151,6 +166,11 @@ base <- base %>% mutate(AGEP = as.numeric(AGEP),
                         PERNP= as.numeric(PERNP)
                         )
 ```
+
+```{r}
+base2 <- base$WAOB
+```
+
 
 # step_6: EDA
 ## Step_6.1 EDA - Data Structure

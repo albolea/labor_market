@@ -12,5 +12,3 @@
 "0","         SMARTPHONE, # Smartphone"
 "0","         TABLET # Tablet or other portable wireless computer"
 "0","  )"
-"0","base <- base %>% left_join(househould) %>% select(-SERIALNO)"
-"0","rm(househould)"
