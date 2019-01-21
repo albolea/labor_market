@@ -1,6 +1,7 @@
-convertCSV2Vector <- function(folder, csv_file) {
- temp_data <-  read.csv(here(folder, csv_file), header = FALSE)$V1
- return(temp_data <- as.factor(temp_data))
+convertCSV2Factor <- function(csv_file, folder = "data") {
+  file_name <- paste(csv_file,"csv", sep = ".")
+  temp_data <-  read.csv(here(folder, file_name), header = FALSE)$V1
+  return(temp_data <- as.factor(temp_data))
 }
 
-z <- convertCSV2Vector("data", "JWTR.csv")
+

@@ -30,6 +30,8 @@ if(!require(DataExplorer)){
   install.packages("DataExplorer")
 }
 library(DataExplorer)
+
+source(here("code","function_convert_CSV_to_vector.R"))
 ```
 
 # Step_2: import the data
@@ -105,11 +107,10 @@ rm(househould)
 
 
 # Step_3: data struction of dataframe of "base"
+This step is to observe the structure of imported raw data, then plan the next step of data cleaning and converting  
 ```{r message=FALSE}
 str(base)
 ```
-
-
 # Step_4: convert the data
 * the categorical variables are in the 
 1. convert the following variables into factors
@@ -166,21 +167,53 @@ base <- base %>% mutate(AGEP = as.numeric(AGEP),
                         PERNP= as.numeric(PERNP)
                         )
 ```
-
+3. replace the factor level to the choices in the survery question for easy understanding.
 ```{r}
-base2 <- base$WAOB
+levels(base$ACCESS) <- convertCSV2Factor("ACCESS")
+levels(base$BROADBND) <- convertCSV2Factor("BROADBND")
+levels(base$CIT) <- convertCSV2Factor("CIT")
+levels(base$COMPOTHX) <- convertCSV2Factor("COMPOTHX")
+levels(base$COW) <- convertCSV2Factor("COW")
+levels(base$DDRS) <- convertCSV2Factor("DDRS")
+levels(base$DEAR) <- convertCSV2Factor("DEAR")
+levels(base$DEYE) <- convertCSV2Factor("DEYE")
+levels(base$DOUT) <- convertCSV2Factor("DOUT")
+levels(base$DOUT) <- convertCSV2Factor("DOUT")
+levels(base$DPHY) <- convertCSV2Factor("DPHY")
+levels(base$DRAT) <- convertCSV2Factor("DRAT")
+levels(base$DRATX) <- convertCSV2Factor("DRATX")
+levels(base$DREM) <- convertCSV2Factor("DREM")
+levels(base$ENG) <- convertCSV2Factor("ENG")
+levels(base$ESR) <- convertCSV2Factor("ESR")
+levels(base$HISP) <- convertCSV2Factor("HISP")
+levels(base$HISPEED) <- convertCSV2Factor("HISPEED")
+levels(base$JWRIP) <- convertCSV2Factor("JWRIP")
+levels(base$JWTR) <- convertCSV2Factor("JWTR")
+levels(base$LAPTOP) <- convertCSV2Factor("LAPTOP")
+levels(base$MAR) <- convertCSV2Factor("MAR")
+levels(base$MIL) <- convertCSV2Factor("MIL")
+levels(base$NWLK) <- convertCSV2Factor("NWLK")
+levels(base$OTHSVCEX) <- convertCSV2Factor("OTHSVCEX")
+levels(base$RAC1P) <- convertCSV2Factor("RAC1P")
+levels(base$RAC2P) <- convertCSV2Factor("RAC2P")
+levels(base$RAC3P) <- convertCSV2Factor("RAC3P")
+levels(base$RACAIAN) <- convertCSV2Factor("RACAIAN")
+levels(base$RACASN) <- convertCSV2Factor("RACASN")
+levels(base$RACBLK) <- convertCSV2Factor("RACBLK")
+levels(base$RACNH) <- convertCSV2Factor("RACNH")
+levels(base$RACWHT) <- convertCSV2Factor("RACWHT")
+levels(base$SATELLITE) <- convertCSV2Factor("SATELLITE")
+levels(base$SCHL) <- convertCSV2Factor("SCHL")
+levels(base$SEX) <- convertCSV2Factor("SEX")
+levels(base$SMARTPHONE) <- convertCSV2Factor("SMARTPHONE")
+levels(base$TABLET) <- convertCSV2Factor("TABLET")
+levels(base$WAOB) <- convertCSV2Factor("WAOB")
+levels(base$WKW) <- convertCSV2Factor("WKW")
 ```
 
+# Step_5: EDA
 
-# step_6: EDA
-## Step_6.1 EDA - Data Structure
-
-```{r}
-str(base)
-```
-
-## Step_6.2 EDA - Data Summary
+1. Data Structure
 ```{r}
 summary(base)
 ```
-

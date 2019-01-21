@@ -460,6 +460,7 @@ rm(househould)</code></pre>
 </div>
 <div id="step_3-data-struction-of-dataframe-of-base" class="section level1">
 <h1>Step_3: data struction of dataframe of “base”</h1>
+<p>This step is to observe the structure of imported raw data, then plan the next step of data cleaning and converting</p>
 <pre class="r"><code>str(base)</code></pre>
 <pre><code>## Classes &#39;spec_tbl_df&#39;, &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;: 47659 obs. of  46 variables:
 ##  $ AGEP      : chr  &quot;84&quot; &quot;84&quot; &quot;78&quot; &quot;46&quot; ...
@@ -567,144 +568,232 @@ rm(househould)</code></pre>
                         WAGP= as.numeric(WAGP),
                         PERNP= as.numeric(PERNP)
                         )</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>replace the factor level to the choices in the survery question for easy understanding.</li>
+</ol>
+<pre class="r"><code>levels(base$ACCESS) &lt;- convertCSV2Factor(&quot;ACCESS&quot;)
+levels(base$BROADBND) &lt;- convertCSV2Factor(&quot;BROADBND&quot;)
+levels(base$CIT) &lt;- convertCSV2Factor(&quot;CIT&quot;)
+levels(base$COMPOTHX) &lt;- convertCSV2Factor(&quot;COMPOTHX&quot;)
+levels(base$COW) &lt;- convertCSV2Factor(&quot;COW&quot;)
+levels(base$DDRS) &lt;- convertCSV2Factor(&quot;DDRS&quot;)
+levels(base$DEAR) &lt;- convertCSV2Factor(&quot;DEAR&quot;)
+levels(base$DEYE) &lt;- convertCSV2Factor(&quot;DEYE&quot;)
+levels(base$DOUT) &lt;- convertCSV2Factor(&quot;DOUT&quot;)
+levels(base$DOUT) &lt;- convertCSV2Factor(&quot;DOUT&quot;)
+levels(base$DPHY) &lt;- convertCSV2Factor(&quot;DPHY&quot;)
+levels(base$DRAT) &lt;- convertCSV2Factor(&quot;DRAT&quot;)
+levels(base$DRATX) &lt;- convertCSV2Factor(&quot;DRATX&quot;)
+levels(base$DREM) &lt;- convertCSV2Factor(&quot;DREM&quot;)
+levels(base$ENG) &lt;- convertCSV2Factor(&quot;ENG&quot;)
+levels(base$ESR) &lt;- convertCSV2Factor(&quot;ESR&quot;)
+levels(base$HISP) &lt;- convertCSV2Factor(&quot;HISP&quot;)
+levels(base$HISPEED) &lt;- convertCSV2Factor(&quot;HISPEED&quot;)
+levels(base$JWRIP) &lt;- convertCSV2Factor(&quot;JWRIP&quot;)
+levels(base$JWTR) &lt;- convertCSV2Factor(&quot;JWTR&quot;)
+levels(base$LAPTOP) &lt;- convertCSV2Factor(&quot;LAPTOP&quot;)
+levels(base$MAR) &lt;- convertCSV2Factor(&quot;MAR&quot;)
+levels(base$MIL) &lt;- convertCSV2Factor(&quot;MIL&quot;)
+levels(base$NWLK) &lt;- convertCSV2Factor(&quot;NWLK&quot;)
+levels(base$OTHSVCEX) &lt;- convertCSV2Factor(&quot;OTHSVCEX&quot;)
+levels(base$RAC1P) &lt;- convertCSV2Factor(&quot;RAC1P&quot;)
+levels(base$RAC2P) &lt;- convertCSV2Factor(&quot;RAC2P&quot;)
+levels(base$RAC3P) &lt;- convertCSV2Factor(&quot;RAC3P&quot;)
+levels(base$RACAIAN) &lt;- convertCSV2Factor(&quot;RACAIAN&quot;)
+levels(base$RACASN) &lt;- convertCSV2Factor(&quot;RACASN&quot;)
+levels(base$RACBLK) &lt;- convertCSV2Factor(&quot;RACBLK&quot;)
+levels(base$RACNH) &lt;- convertCSV2Factor(&quot;RACNH&quot;)
+levels(base$RACWHT) &lt;- convertCSV2Factor(&quot;RACWHT&quot;)
+levels(base$SATELLITE) &lt;- convertCSV2Factor(&quot;SATELLITE&quot;)
+levels(base$SCHL) &lt;- convertCSV2Factor(&quot;SCHL&quot;)
+levels(base$SEX) &lt;- convertCSV2Factor(&quot;SEX&quot;)
+levels(base$SMARTPHONE) &lt;- convertCSV2Factor(&quot;SMARTPHONE&quot;)
+levels(base$TABLET) &lt;- convertCSV2Factor(&quot;TABLET&quot;)
+levels(base$WAOB) &lt;- convertCSV2Factor(&quot;WAOB&quot;)
+levels(base$WKW) &lt;- convertCSV2Factor(&quot;WKW&quot;)</code></pre>
 </div>
-<div id="step_6-eda" class="section level1">
-<h1>step_6: EDA</h1>
-<div id="step_6.1-eda---data-structure" class="section level2">
-<h2>Step_6.1 EDA - Data Structure</h2>
-<pre class="r"><code>str(base)</code></pre>
-<pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    47659 obs. of  46 variables:
-##  $ AGEP      : num  84 84 78 46 52 20 16 66 68 64 ...
-##  $ CIT       : Factor w/ 5 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ COW       : Factor w/ 9 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,..: NA NA 1 1 NA NA NA 8 NA 1 ...
-##  $ DDRS      : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ DEAR      : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ DEYE      : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ DOUT      : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ DPHY      : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ DRAT      : Factor w/ 6 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,..: NA NA NA NA NA NA NA NA NA NA ...
-##  $ DRATX     : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: NA NA NA 2 NA NA NA NA 2 NA ...
-##  $ DREM      : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ ENG       : Factor w/ 4 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;: NA NA NA NA NA NA NA NA NA NA ...
-##  $ JWMNP     : num  NA NA 50 20 NA NA NA NA NA 15 ...
-##  $ JWRIP     : Factor w/ 10 levels &quot;01&quot;,&quot;02&quot;,&quot;03&quot;,..: NA NA 1 1 NA NA NA NA NA 1 ...
-##  $ JWTR      : Factor w/ 9 levels &quot;01&quot;,&quot;02&quot;,&quot;04&quot;,..: NA NA 1 1 NA NA NA NA NA 1 ...
-##  $ MAR       : Factor w/ 5 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,..: 1 1 3 1 1 5 5 1 1 1 ...
-##  $ MIL       : Factor w/ 4 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;: 4 4 4 3 4 4 NA 4 2 4 ...
-##  $ NWLK      : Factor w/ 3 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;: 2 2 3 3 2 2 2 2 2 3 ...
-##  $ SCHL      : Factor w/ 24 levels &quot;01&quot;,&quot;02&quot;,&quot;03&quot;,..: 19 21 19 20 18 16 13 16 21 18 ...
-##  $ SEMP      : num  0 0 0 0 0 0 0 0 0 0 ...
-##  $ SEX       : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 1 2 1 2 1 2 2 1 1 ...
-##  $ WAGP      : num  0 0 27300 65000 0 0 0 0 0 78000 ...
-##  $ ESR       : Factor w/ 6 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,..: 6 6 1 1 6 6 6 6 6 1 ...
-##  $ HISP      : Factor w/ 23 levels &quot;01&quot;,&quot;02&quot;,&quot;03&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ NATIVITY  : num  1 1 1 1 1 1 1 1 1 1 ...
-##  $ PERNP     : num  0 0 27300 65000 0 0 0 0 0 78000 ...
-##  $ RAC1P     : Factor w/ 8 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;5&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ RAC2P     : Factor w/ 40 levels &quot;01&quot;,&quot;02&quot;,&quot;03&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ RAC3P     : Factor w/ 62 levels &quot;001&quot;,&quot;002&quot;,&quot;003&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ RACAIAN   : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ RACASN    : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ RACBLK    : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ RACNH     : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ RACWHT    : Factor w/ 2 levels &quot;0&quot;,&quot;1&quot;: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ WAOB      : Factor w/ 8 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ WKW       : Factor w/ 6 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,..: NA NA 1 1 NA NA NA NA NA 1 ...
-##  $ TYPE      : Factor w/ 3 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ ACCESS    : Factor w/ 3 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;: 1 1 3 1 1 1 1 1 1 1 ...
-##  $ BROADBND  : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 NA 1 1 1 1 1 1 1 ...
-##  $ COMPOTHX  : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ HISPEED   : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 1 1 NA 1 1 1 1 1 1 1 ...
-##  $ LAPTOP    : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 1 1 2 1 1 1 1 1 1 2 ...
-##  $ OTHSVCEX  : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 NA 2 2 2 2 2 2 2 ...
-##  $ SATELLITE : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 NA 2 2 2 2 2 2 2 ...
-##  $ SMARTPHONE: Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 2 1 1 1 1 1 1 1 ...
-##  $ TABLET    : Factor w/ 2 levels &quot;1&quot;,&quot;2&quot;: 2 2 2 1 1 1 1 1 1 2 ...</code></pre>
-</div>
-<div id="step_6.2-eda---data-summary" class="section level2">
-<h2>Step_6.2 EDA - Data Summary</h2>
+<div id="step_5-eda" class="section level1">
+<h1>Step_5: EDA</h1>
+<ol style="list-style-type: decimal">
+<li>Data Structure</li>
+</ol>
 <pre class="r"><code>summary(base)</code></pre>
-<pre><code>##       AGEP       CIT            COW          DDRS       DEAR     
-##  Min.   : 0.00   1:45947   1      :17266   1   : 2121   1: 2453  
-##  1st Qu.:22.00   2:   62   2      : 1851   2   :43191   2:45206  
-##  Median :44.00   3:  315   3      : 1765   NA&#39;s: 2347            
-##  Mean   :42.54   4:  585   4      : 1514                         
-##  3rd Qu.:62.00   5:  750   6      : 1502                         
-##  Max.   :93.00             (Other): 2241                         
-##                            NA&#39;s   :21520                         
-##  DEYE        DOUT         DPHY         DRAT        DRATX      
-##  1: 1787   1   : 3713   1   : 5473   1   :   46   1   : 1017  
-##  2:45872   2   :36349   2   :39839   2   :  267   2   : 3587  
-##            NA&#39;s: 7597   NA&#39;s: 2347   3   :  167   NA&#39;s:43055  
-##                                      4   :  131               
-##                                      5   :  358               
-##                                      6   :   48               
-##                                      NA&#39;s:46642               
-##    DREM         ENG            JWMNP            JWRIP      
-##  1   : 3497   1   : 1131   Min.   :  1.00   01     :16595  
-##  2   :41815   2   :  400   1st Qu.: 10.00   02     : 1266  
-##  NA&#39;s: 2347   3   :  289   Median : 20.00   03     :  203  
-##               4   :   49   Mean   : 24.68   04     :   83  
-##               NA&#39;s:45790   3rd Qu.: 30.00   05     :   31  
-##                            Max.   :125.00   (Other):   34  
-##                            NA&#39;s   :28916    NA&#39;s   :29447  
-##       JWTR       MAR         MIL          NWLK            SCHL      
-##  01     :18212   1:20667   1   :  117   1   : 1471   16     : 9673  
-##  11     :  620   2: 3307   2   : 3714   2   :16070   19     : 6176  
-##  10     :  281   3: 4937   3   :  773   3   :21933   21     : 5471  
-##  12     :  142   4:  827   4   :34235   NA&#39;s: 8185   20     : 3025  
-##  02     :   56   5:17921   NA&#39;s: 8820                18     : 2888  
-##  (Other):   52                                       (Other):19030  
-##  NA&#39;s   :28296                                       NA&#39;s   : 1396  
-##       SEMP        SEX            WAGP          ESR             HISP      
-##  Min.   : -6800   1:22911   Min.   :     0   1   :19237   01     :46252  
-##  1st Qu.:     0   2:24748   1st Qu.:     0   2   :  389   02     :  842  
-##  Median :     0             Median :  1800   3   : 1264   03     :  131  
-##  Mean   :  1278             Mean   : 21782   4   :  126   07     :   96  
-##  3rd Qu.:     0             3rd Qu.: 31200   5   :    1   24     :   88  
-##  Max.   :266000             Max.   :356000   6   :18457   04     :   48  
-##  NA&#39;s   :7597               NA&#39;s   :7597     NA&#39;s: 8185   (Other):  202  
-##     NATIVITY         PERNP            RAC1P           RAC2P      
-##  Min.   :1.000   Min.   : -6800   1      :34707   01     :34707  
-##  1st Qu.:1.000   1st Qu.:     0   2      :10972   02     :10972  
-##  Median :1.000   Median :  4550   9      :  734   68     :  734  
-##  Mean   :1.028   Mean   : 23404   6      :  558   67     :  439  
-##  3rd Qu.:1.000   3rd Qu.: 34000   8      :  439   38     :  121  
-##  Max.   :2.000   Max.   :622000   3      :  185   43     :  111  
-##                  NA&#39;s   :8185     (Other):   64   (Other):  575  
-##      RAC3P       RACAIAN   RACASN    RACBLK    RACNH     RACWHT   
-##  001    :34707   0:47142   0:46928   0:36369   0:47646   0:12297  
-##  002    :10972   1:  517   1:  731   1:11290   1:   13   1:35362  
-##  015    :  439                                                    
-##  017    :  234                                                    
-##  003    :  231                                                    
-##  016    :  223                                                    
-##  (Other):  853                                                    
-##       WAOB         WKW        TYPE       ACCESS      BROADBND    
-##  1      :45947   1   :16563   1:45347   1   :36959   1   :31969  
-##  3      :  623   2   :  430   2: 1308   2   : 1202   2   : 4990  
-##  4      :  553   3   : 1116   3: 1004   3   : 7186   NA&#39;s:10700  
-##  5      :  367   4   : 1353             NA&#39;s: 2312               
-##  2      :   62   5   : 1166                                      
-##  6      :   53   6   : 1608                                      
-##  (Other):   54   NA&#39;s:25423                                      
-##  COMPOTHX     HISPEED       LAPTOP      OTHSVCEX     SATELLITE   
-##  1   : 1035   1   :28048   1   :33811   1   :  484   1   : 3898  
-##  2   :44312   2   : 8911   2   :11536   2   :36475   2   :33061  
-##  NA&#39;s: 2312   NA&#39;s:10700   NA&#39;s: 2312   NA&#39;s:10700   NA&#39;s:10700  
+<pre><code>##       AGEP      
+##  Min.   : 0.00  
+##  1st Qu.:22.00  
+##  Median :44.00  
+##  Mean   :42.54  
+##  3rd Qu.:62.00  
+##  Max.   :93.00  
+##                 
+##                                                                               CIT       
+##  Born in the U.S.                                                               :45947  
+##  Born in Puerto Rico,  Guam,  the U.S. Virgin Islands,  or the Northern Marianas:   62  
+##  Born abroad of American parent(s)                                              :  315  
+##  U.S. citizen by naturalization                                                 :  585  
+##  Not a citizen of the U.S.                                                      :  750  
+##                                                                                         
+##                                                                                         
+##                                                                                                              COW       
+##  Employee of a private for-profit company or business, or of an individual,  for wages, salary,  or commissions:17266  
+##  Employee of a private not-for-profit,  tax-exempt,  or charitable organization                                : 1851  
+##  Local government employee (city,  county,  etc.)                                                              : 1765  
+##  State government employee                                                                                     : 1514  
+##  Self-employed in own not incorporated business,  professional practice,  or farm                              : 1502  
+##  (Other)                                                                                                       : 2241  
+##  NA&#39;s                                                                                                          :21520  
+##    DDRS        DEAR        DEYE         DOUT         DPHY      
+##  Yes : 2121   Yes: 2453   Yes: 1787   Yes : 3713   Yes : 5473  
+##  No  :43191   No :45206   No :45872   No  :36349   No  :39839  
+##  NA&#39;s: 2347                           NA&#39;s: 7597   NA&#39;s: 2347  
+##                                                                
+##                                                                
+##                                                                
+##                                                                
+##                          DRAT        DRATX         DREM      
+##  0 percent                 :   46   Yes : 1017   Yes : 3497  
+##  10 or 20 percent          :  267   No  : 3587   No  :41815  
+##  30 or 40 percent          :  167   NA&#39;s:43055   NA&#39;s: 2347  
+##  50 or 60 percent          :  131                            
+##  70, 80, 90, or 100 percent:  358                            
+##  Not reported              :   48                            
+##  NA&#39;s                      :46642                            
+##          ENG            JWMNP                        JWRIP      
+##  Very well : 1131   Min.   :  1.00   Drove alone        :16595  
+##  Well      :  400   1st Qu.: 10.00   In 2-person carpool: 1266  
+##  Not well  :  289   Median : 20.00   In 3-person carpool:  203  
+##  Not at all:   49   Mean   : 24.68   In 4-person carpool:   83  
+##  NA&#39;s      :45790   3rd Qu.: 30.00   In 5-person carpool:   31  
+##                     Max.   :125.00   (Other)            :   34  
+##                     NA&#39;s   :28916    NA&#39;s               :29447  
+##                  JWTR                                        MAR       
+##  Car, truck, or van:18212   Married                            :20667  
+##  Worked at home    :  620   Widowed                            : 3307  
+##  Walked            :  281   Divorced                           : 4937  
+##  Other method      :  142   Separated                          :  827  
+##  Bus or trolley bus:   56   Never married or under 15 years old:17921  
+##  (Other)           :   52                                              
+##  NA&#39;s              :28296                                              
+##                                                           MIL       
+##  Now on active duty                                         :  117  
+##  On active duty in the past, but not now                    : 3714  
+##  Only on active duty for training in Reserves/National Guard:  773  
+##  Never served in the military                               :34235  
+##  NA&#39;s                                                       : 8820  
+##                                                                     
+##                                                                     
+##              NWLK      
+##  Yes           : 1471  
+##  No            :16070  
+##  Did not report:21933  
+##  NA&#39;s          : 8185  
+##                        
+##                        
+##                        
+##                                             SCHL            SEMP       
+##  Regular high school diploma                  : 9673   Min.   : -6800  
+##  1 or more years of college credit,  no degree: 6176   1st Qu.:     0  
+##  Bachelor&#39;s degree                            : 5471   Median :     0  
+##  Associate&#39;s degree                           : 3025   Mean   :  1278  
+##  Some college,  but less than 1 year          : 2888   3rd Qu.:     0  
+##  (Other)                                      :19030   Max.   :266000  
+##  NA&#39;s                                         : 1396   NA&#39;s   :7597    
+##      SEX             WAGP       
+##  Male  :22911   Min.   :     0  
+##  Female:24748   1st Qu.:     0  
+##                 Median :  1800  
+##                 Mean   : 21782  
+##                 3rd Qu.: 31200  
+##                 Max.   :356000  
+##                 NA&#39;s   :7597    
+##                                             ESR       
+##  Civilian employed, at work                   :19237  
+##  Civilian employed, with a job but not at work:  389  
+##  Unemployed                                   : 1264  
+##  Armed forces, at work                        :  126  
+##  Armed forces, with a job but not at work     :    1  
+##  Not in labor force                           :18457  
+##  NA&#39;s                                         : 8185  
+##                                 HISP          NATIVITY    
+##  Not Spanish/Hispanic/Latino      :46252   Min.   :1.000  
+##  Mexican                          :  842   1st Qu.:1.000  
+##  Puerto Rican                     :  131   Median :1.000  
+##  Guatemalan                       :   96   Mean   :1.028  
+##  All Other Spanish/Hispanic/Latino:   88   3rd Qu.:1.000  
+##  Cuban                            :   48   Max.   :2.000  
+##  (Other)                          :  202                  
+##      PERNP                                    RAC1P      
+##  Min.   : -6800   White alone                    :34707  
+##  1st Qu.:     0   Black or African American alone:10972  
+##  Median :  4550   Two or More Races              :  734  
+##  Mean   : 23404   Asian alone                    :  558  
+##  3rd Qu.: 34000   Some Other Race alone          :  439  
+##  Max.   :622000   American Indian alone          :  185  
+##  NA&#39;s   :8185     (Other)                        :   64  
+##                               RAC2P      
+##  White alone                     :34707  
+##  Black or African American alone :10972  
+##  Two or More Races               :  734  
+##  Some Other Race alone           :  439  
+##  Asian Indian alone              :  121  
+##  Chinese, except Taiwanese, alone:  111  
+##  (Other)                         :  575  
+##                                       RAC3P       RACAIAN     RACASN     
+##  White alone                             :34707   No :47142   No :46928  
+##  Black or African American alone         :10972   Yes:  517   Yes:  731  
+##  Some Other Race alone                   :  439                          
+##  White; American Indian and Alaska Native:  234                          
+##  American Indian and Alaska Native alone :  231                          
+##  White; Black or African American        :  223                          
+##  (Other)                                 :  853                          
+##  RACBLK      RACNH       RACWHT     
+##  No :36369   No :47646   No :12297  
+##  Yes:11290   Yes:   13   Yes:35362  
+##                                     
+##                                     
+##                                     
+##                                     
+##                                     
+##                                      WAOB      
+##  US state (POB = 001-059)              :45947  
+##  Latin America (POB = 303,310-399)     :  623  
+##  Asia (POB = 158-159,161,200-299)      :  553  
+##  Europe (POB = 100-157,160,162-199)    :  367  
+##  PR and US Island Areas (POB = 060-099):   62  
+##  Africa (POB = 400-499)                :   53  
+##  (Other)                               :   54  
+##                                               WKW        TYPE     
+##  50 to 52 weeks worked during past 12 months    :16563   1:45347  
+##  48 to 49 weeks worked during past 12 months    :  430   2: 1308  
+##  40 to 47 weeks worked during past 12 months    : 1116   3: 1004  
+##  27 to 39 weeks worked during past 12 months    : 1353            
+##  14 to 26 weeks worked during past 12 months    : 1166            
+##  less than 14 weeks worked during past 12 months: 1608            
+##  NA&#39;s                                           :25423            
+##                                                                    ACCESS     
+##  Yes, by paying a cell phone company or Internet service provider     :36959  
+##  Yes, without paying a cell phone company or Internet service provider: 1202  
+##  No access to the Internet at this house, apartment, or mobile home   : 7186  
+##  NA&#39;s                                                                 : 2312  
+##                                                                               
+##                                                                               
+##                                                                               
+##  BROADBND     COMPOTHX     HISPEED       LAPTOP      OTHSVCEX    
+##  Yes :31969   Yes : 1035   Yes :28048   Yes :33811   Yes :  484  
+##  No  : 4990   No  :44312   No  : 8911   No  :11536   No  :36475  
+##  NA&#39;s:10700   NA&#39;s: 2312   NA&#39;s:10700   NA&#39;s: 2312   NA&#39;s:10700  
 ##                                                                  
 ##                                                                  
 ##                                                                  
 ##                                                                  
-##  SMARTPHONE    TABLET     
-##  1   :34685   1   :27043  
-##  2   :10662   2   :18304  
-##  NA&#39;s: 2312   NA&#39;s: 2312  
-##                           
-##                           
-##                           
+##  SATELLITE    SMARTPHONE    TABLET     
+##  Yes : 3898   Yes :34685   Yes :27043  
+##  No  :33061   No  :10662   No  :18304  
+##  NA&#39;s:10700   NA&#39;s: 2312   NA&#39;s: 2312  
+##                                        
+##                                        
+##                                        
 ## </code></pre>
-</div>
 </div>
 
 
