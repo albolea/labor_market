@@ -5,11 +5,14 @@ date: "January 17, 2019"
 output: html_document
 ---
 # step_1: clean the environment and import the library
-```{r setup, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+* The loaded librariesin the code are:
+1. tidyverse
+2. here 
+3. DataExplorer
+```{r setup, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 # Clear environment
 rm(list = ls(all = TRUE))
-knitr::opts_chunk$set(echo = FALSE, message=FALSE, error=FALSE, warning=FALSE)
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
 # check if package is installed, if not installed then load
 if(!require(here)){
   install.packages("here")
@@ -25,6 +28,7 @@ if(!require(tidyverse)){
   install.packages("DataExplorer")
 }
 library(DataExplorer)
+source(here("code","function_convert_CSV_to_vector.R"))
 ```
 
 # step_2: import the raw data of ss16pal into the dataframe as "base"
@@ -149,6 +153,49 @@ base <- base %>% mutate(AGEP = as.numeric(AGEP),
                         PERNP= as.numeric(PERNP)
                         )
 ```
+3. replace the factor level to the choices in the survery question for easy understanding.
+```{r}
+levels(base$ACCESS) <- convertCSV2Factor("ACCESS")
+levels(base$BROADBND) <- convertCSV2Factor("BROADBND")
+levels(base$CIT) <- convertCSV2Factor("CIT")
+levels(base$COMPOTHX) <- convertCSV2Factor("COMPOTHX")
+levels(base$COW) <- convertCSV2Factor("COW")
+levels(base$DDRS) <- convertCSV2Factor("DDRS")
+levels(base$DEAR) <- convertCSV2Factor("DEAR")
+levels(base$DEYE) <- convertCSV2Factor("DEYE")
+levels(base$DOUT) <- convertCSV2Factor("DOUT")
+levels(base$DOUT) <- convertCSV2Factor("DOUT")
+levels(base$DPHY) <- convertCSV2Factor("DPHY")
+levels(base$DRAT) <- convertCSV2Factor("DRAT")
+levels(base$DRATX) <- convertCSV2Factor("DRATX")
+levels(base$DREM) <- convertCSV2Factor("DREM")
+levels(base$ENG) <- convertCSV2Factor("ENG")
+levels(base$ESR) <- convertCSV2Factor("ESR")
+levels(base$HISP) <- convertCSV2Factor("HISP")
+levels(base$HISPEED) <- convertCSV2Factor("HISPEED")
+levels(base$JWRIP) <- convertCSV2Factor("JWRIP")
+levels(base$JWTR) <- convertCSV2Factor("JWTR")
+levels(base$LAPTOP) <- convertCSV2Factor("LAPTOP")
+levels(base$MAR) <- convertCSV2Factor("MAR")
+levels(base$MIL) <- convertCSV2Factor("MIL")
+levels(base$NWLK) <- convertCSV2Factor("NWLK")
+levels(base$OTHSVCEX) <- convertCSV2Factor("OTHSVCEX")
+levels(base$RAC1P) <- convertCSV2Factor("RAC1P")
+levels(base$RAC2P) <- convertCSV2Factor("RAC2P")
+levels(base$RAC3P) <- convertCSV2Factor("RAC3P")
+levels(base$RACAIAN) <- convertCSV2Factor("RACAIAN")
+levels(base$RACASN) <- convertCSV2Factor("RACASN")
+levels(base$RACBLK) <- convertCSV2Factor("RACBLK")
+levels(base$RACNH) <- convertCSV2Factor("RACNH")
+levels(base$RACWHT) <- convertCSV2Factor("RACWHT")
+levels(base$SATELLITE) <- convertCSV2Factor("SATELLITE")
+levels(base$SCHL) <- convertCSV2Factor("SCHL")
+levels(base$SEX) <- convertCSV2Factor("SEX")
+levels(base$SMARTPHONE) <- convertCSV2Factor("SMARTPHONE")
+levels(base$TABLET) <- convertCSV2Factor("TABLET")
+levels(base$WAOB) <- convertCSV2Factor("WAOB")
+levels(base$WKW) <- convertCSV2Factor("WKW")
+```
 
 # step_6: EDA
 ## Step_6.1 EDA - Data Structure
@@ -168,7 +215,7 @@ summary(base)
 
 # Exploratory data analysis
 
-Age:
+*Age:
 According to the graph and table below we see that our data includes people from 0 to 99 years old.
 ```{r eda_age}
 base %>% select(AGEP) %>%  summary()
@@ -182,11 +229,122 @@ base %>% select(AGEP) %>%  summary()
 base %>% ggplot(aes(AGEP)) + geom_density()  
 ```
 
-Also, we decided to exclude people /n 
-  1. Working without pay in family business or farm
-  2. Unemployed and last worked 5 years ago or earlier or never worked
+*Labor:  
+We decided to exclude people:  
+  1. Working without pay in family business or farm  
+  2. Unemployed and last worked 5 years ago or earlier or never worked  
 ```{r }
-base <- base %>%  filter(COW<8)
+base <- base %>%  filter(as.integer(COW)<8)
+```
+  3. Worked less than 50 weeks in the last 12 months
+```{r }
+base <- base %>%  filter(as.integer(WKW)==1)
+```  
 
-table(base$WAGP)
+
+*Wage:  
+As we can see below we have some extreme cases where the earnings is US`$`356,000 that we consider as outliers. Also, we add a restriction than a worker would receive a minimum wage of US`$`5.00, so we excluded earnings that are lower than $5*40*50 = 10,000$     
+```{r }
+base  %>% ggplot(aes(WAGP)) + geom_histogram()
+base <- base %>%  filter(WAGP<356000 & WAGP >=5*50*40)
+```
+Our earnings distributions after this considerations is:
+```{r }
+base  %>% ggplot(aes(WAGP)) + geom_density()
+base  %>% ggplot(aes(y=WAGP)) + geom_boxplot()
+
+```
+
+# Exploratory data analysis after restrictions
+```{r }
+summary(base)
+```
+
+#1.  Using Tablet as a proxy of Technology Access
+
+```{r }
+base %>% select(TABLET) %>% summary()
+base %>% filter(TABLET=="Yes") %>% select(WAGP) %>% summary() #person have tablet
+base %>% filter(TABLET=="No") %>% select(WAGP) %>% summary() #person doesn't have tablet
+base %>% filter(is.na(TABLET)) %>% select(WAGP) %>% summary() #Tablet NA
+
+
+base %>%  ggplot(aes(WAGP,color=TABLET)) + geom_density() + 
+  labs(title="Earnings x Having Tablet",
+       x ="Earnings", y = "Density") +
+  scale_color_discrete(name="Person has Tablet",
+                      labels=c("Yes", "No", "NA"))
+
+base %>%  ggplot(aes(x=TABLET,y=WAGP,fill=TABLET)) + geom_boxplot()+
+  labs(title="Earnings x Having Tablet",
+       x ="Earnings", y = "Density") +
+  scale_fill_discrete(name="Person has Tablet",
+                      breaks=c("1", "2", "NA"),
+                      labels=c("Yes", "No", "NA"))
+```
+
+
+#2.  Using Smartphone as a proxy of Technology Access
+```{r }
+base %>% select(SMARTPHONE) %>% summary()
+base %>% filter(SMARTPHONE=="Yes") %>% select(WAGP) %>% summary() #person have smartphone
+base %>% filter(SMARTPHONE=="No") %>% select(WAGP) %>% summary() #person doesn't have smartphone
+base %>% filter(is.na(SMARTPHONE)) %>% select(WAGP) %>% summary() #smartphone NA
+
+
+base %>%  ggplot(aes(WAGP,color=SMARTPHONE)) + geom_density() + 
+  labs(title="Earnings x Having Smartphone",
+       x ="Earnings", y = "Density") +
+  scale_color_discrete(name="Person has Smartphone",
+                      labels=c("Yes", "No", "NA"))
+
+base %>%  ggplot(aes(x=SMARTPHONE,y=WAGP,fill=SMARTPHONE)) + geom_boxplot()+
+  labs(title="Earnings x Having Smartphone",
+       x ="Earnings", y = "Density") +
+  scale_fill_discrete(name="Person has Smartphone",
+                      breaks=c("1", "2", "NA"),
+                      labels=c("Yes", "No", "NA"))
+```
+#3.  Using Laptop as a proxy of Technology Access
+```{r }
+base %>% select(LAPTOP) %>% summary()
+base %>% filter(LAPTOP=="Yes") %>% select(WAGP) %>% summary() #person have Laptop
+base %>% filter(LAPTOP=="No") %>% select(WAGP) %>% summary() #person doesn't have Laptop
+base %>% filter(is.na(LAPTOP)) %>% select(WAGP) %>% summary() #Laptop NA
+
+
+base %>%  ggplot(aes(WAGP,color=LAPTOP)) + geom_density() + 
+  labs(title="Earnings x Having Laptop",
+       x ="Earnings", y = "Density") +
+  scale_color_discrete(name="Person has Laptop",
+                      labels=c("Yes", "No", "NA"))
+
+base %>%  ggplot(aes(x=LAPTOP,y=WAGP,fill=LAPTOP)) + geom_boxplot()+
+  labs(title="Earnings x Having Laptop",
+       x ="Earnings", y = "Density") +
+  scale_fill_discrete(name="Person has Laptop",
+                      breaks=c("1", "2", "NA"),
+                      labels=c("Yes", "No", "NA"))
+```
+
+#4.  Using HIGH SPEED Internet as a proxy of Technology Access
+```{r }
+base %>% select(HISPEED) %>% summary()
+base %>% filter(HISPEED=="Yes") %>% select(WAGP) %>% summary() #person have HIGH SPEED Internet
+base %>% filter(HISPEED=="No") %>% select(WAGP) %>% summary() #person doesn't have HIGH SPEED Internet
+base %>% filter(is.na(HISPEED)) %>% select(WAGP) %>% summary() #HIGH SPEED Internet NA
+
+
+base %>%  ggplot(aes(WAGP,color=HISPEED)) + geom_density() + 
+  labs(title="Earnings x Having HIGH SPEED Internet",
+       x ="Earnings", y = "Density") +
+  scale_color_discrete(name="Person has HIGH SPEED Internet",
+                      labels=c("Yes", "No", "NA"))
+
+base %>%  ggplot(aes(x=HISPEED,y=WAGP,fill=HISPEED)) + geom_boxplot()+
+  labs(title="Earnings x Having HIGH SPEED Internet",
+       x ="Earnings", y = "Density") +
+  scale_fill_discrete(name="Person has HIGH SPEED Internet",
+                      breaks=c("1", "2", "NA"),
+                      labels=c("Yes", "No", "NA"))
 ```
