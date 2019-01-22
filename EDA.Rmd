@@ -243,10 +243,11 @@ base <- base %>%  filter(as.integer(WKW)==1)
 
 
 *Wage:  
-As we can see below we have some extreme cases where the earnings is US`$`356,000 that we consider as outliers. Also, we add a restriction than a worker would receive a minimum wage of US`$`5.00, so we excluded earnings that are lower than $5*40*50 = 10,000$     
+Since the focus of our analysis is access to technology we can restrict the data by removing the rich and upper middle class (setting the max at the 3rd Quartile) because at a certain wage level we can conclude that technology becomes more about choice than access.  
 ```{r }
 base  %>% ggplot(aes(WAGP)) + geom_histogram()
-base <- base %>%  filter(WAGP<356000 & WAGP >=5*50*40)
+base <- base %>%  filter(WAGP<54000)
+summary(base$WAGP)
 ```
 Our earnings distributions after this considerations is:
 ```{r }
@@ -260,27 +261,38 @@ base  %>% ggplot(aes(y=WAGP)) + geom_boxplot()
 summary(base)
 ```
 
+#Examine access to the internet and its relation to earnings.
+
+```{r}
+base %>% select(ACCESS) %>% summary()
+
+base %>%  filter(!is.na(ACCESS)) %>% 
+  ggplot(aes(WAGP,color=ACCESS)) + geom_density() + 
+  labs(title="Earnings x Access to the internet",
+       x ="Earnings", y = "Density") +
+  scale_color_discrete(name="Internet Access",
+                      labels=c("Yes- Paying", "Yes-Not Paying", "No"))
+
+base %>%  filter(!is.na(ACCESS)) %>%
+  ggplot() + geom_histogram(aes(x=WAGP,fill=ACCESS), binwidth = 10000) 
+```
+
 #1.  Using Tablet as a proxy of Technology Access
 
 ```{r }
 base %>% select(TABLET) %>% summary()
 base %>% filter(TABLET=="Yes") %>% select(WAGP) %>% summary() #person have tablet
 base %>% filter(TABLET=="No") %>% select(WAGP) %>% summary() #person doesn't have tablet
-base %>% filter(is.na(TABLET)) %>% select(WAGP) %>% summary() #Tablet NA
 
-
-base %>%  ggplot(aes(WAGP,color=TABLET)) + geom_density() + 
+base %>%  filter(!is.na(TABLET)) %>%
+  ggplot(aes(WAGP,color=TABLET)) + geom_density() + 
   labs(title="Earnings x Having Tablet",
        x ="Earnings", y = "Density") +
   scale_color_discrete(name="Person has Tablet",
-                      labels=c("Yes", "No", "NA"))
+                      labels=c("Yes", "No"))
 
-base %>%  ggplot(aes(x=TABLET,y=WAGP,fill=TABLET)) + geom_boxplot()+
-  labs(title="Earnings x Having Tablet",
-       x ="Earnings", y = "Density") +
-  scale_fill_discrete(name="Person has Tablet",
-                      breaks=c("1", "2", "NA"),
-                      labels=c("Yes", "No", "NA"))
+base %>%  filter(!is.na(TABLET)) %>%
+  ggplot() + geom_histogram(aes(x=WAGP,fill=TABLET), binwidth = 5000) 
 ```
 
 
@@ -289,42 +301,32 @@ base %>%  ggplot(aes(x=TABLET,y=WAGP,fill=TABLET)) + geom_boxplot()+
 base %>% select(SMARTPHONE) %>% summary()
 base %>% filter(SMARTPHONE=="Yes") %>% select(WAGP) %>% summary() #person have smartphone
 base %>% filter(SMARTPHONE=="No") %>% select(WAGP) %>% summary() #person doesn't have smartphone
-base %>% filter(is.na(SMARTPHONE)) %>% select(WAGP) %>% summary() #smartphone NA
 
-
-base %>%  ggplot(aes(WAGP,color=SMARTPHONE)) + geom_density() + 
+base %>%  filter(!is.na(SMARTPHONE)) %>%
+  ggplot(aes(WAGP,color=SMARTPHONE)) + geom_density() + 
   labs(title="Earnings x Having Smartphone",
        x ="Earnings", y = "Density") +
   scale_color_discrete(name="Person has Smartphone",
-                      labels=c("Yes", "No", "NA"))
+                      labels=c("Yes", "No"))
 
-base %>%  ggplot(aes(x=SMARTPHONE,y=WAGP,fill=SMARTPHONE)) + geom_boxplot()+
-  labs(title="Earnings x Having Smartphone",
-       x ="Earnings", y = "Density") +
-  scale_fill_discrete(name="Person has Smartphone",
-                      breaks=c("1", "2", "NA"),
-                      labels=c("Yes", "No", "NA"))
+base %>%  filter(!is.na(SMARTPHONE)) %>%
+  ggplot() + geom_histogram(aes(x=WAGP,fill=SMARTPHONE), binwidth = 5000) 
 ```
 #3.  Using Laptop as a proxy of Technology Access
 ```{r }
 base %>% select(LAPTOP) %>% summary()
 base %>% filter(LAPTOP=="Yes") %>% select(WAGP) %>% summary() #person have Laptop
 base %>% filter(LAPTOP=="No") %>% select(WAGP) %>% summary() #person doesn't have Laptop
-base %>% filter(is.na(LAPTOP)) %>% select(WAGP) %>% summary() #Laptop NA
 
-
-base %>%  ggplot(aes(WAGP,color=LAPTOP)) + geom_density() + 
+base %>%  filter(!is.na(LAPTOP)) %>%
+  ggplot(aes(WAGP,color=LAPTOP)) + geom_density() + 
   labs(title="Earnings x Having Laptop",
        x ="Earnings", y = "Density") +
   scale_color_discrete(name="Person has Laptop",
-                      labels=c("Yes", "No", "NA"))
+                      labels=c("Yes", "No"))
 
-base %>%  ggplot(aes(x=LAPTOP,y=WAGP,fill=LAPTOP)) + geom_boxplot()+
-  labs(title="Earnings x Having Laptop",
-       x ="Earnings", y = "Density") +
-  scale_fill_discrete(name="Person has Laptop",
-                      breaks=c("1", "2", "NA"),
-                      labels=c("Yes", "No", "NA"))
+base %>%  filter(!is.na(LAPTOP)) %>%
+  ggplot() + geom_histogram(aes(x=WAGP,fill=LAPTOP), binwidth = 5000)
 ```
 
 #4.  Using HIGH SPEED Internet as a proxy of Technology Access
@@ -332,19 +334,14 @@ base %>%  ggplot(aes(x=LAPTOP,y=WAGP,fill=LAPTOP)) + geom_boxplot()+
 base %>% select(HISPEED) %>% summary()
 base %>% filter(HISPEED=="Yes") %>% select(WAGP) %>% summary() #person have HIGH SPEED Internet
 base %>% filter(HISPEED=="No") %>% select(WAGP) %>% summary() #person doesn't have HIGH SPEED Internet
-base %>% filter(is.na(HISPEED)) %>% select(WAGP) %>% summary() #HIGH SPEED Internet NA
 
-
-base %>%  ggplot(aes(WAGP,color=HISPEED)) + geom_density() + 
-  labs(title="Earnings x Having HIGH SPEED Internet",
+base %>%  filter(!is.na(HISPEED)) %>%
+  ggplot(aes(WAGP,color=HISPEED)) + geom_density() + 
+  labs(title="Earnings x Having High Speed Internet",
        x ="Earnings", y = "Density") +
-  scale_color_discrete(name="Person has HIGH SPEED Internet",
-                      labels=c("Yes", "No", "NA"))
+  scale_color_discrete(name="Person has High Speed Internet",
+                      labels=c("Yes", "No"))
 
-base %>%  ggplot(aes(x=HISPEED,y=WAGP,fill=HISPEED)) + geom_boxplot()+
-  labs(title="Earnings x Having HIGH SPEED Internet",
-       x ="Earnings", y = "Density") +
-  scale_fill_discrete(name="Person has HIGH SPEED Internet",
-                      breaks=c("1", "2", "NA"),
-                      labels=c("Yes", "No", "NA"))
+base %>%  filter(!is.na(HISPEED)) %>%
+  ggplot() + geom_histogram(aes(x=WAGP,fill=HISPEED), binwidth = 5000)
 ```
