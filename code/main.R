@@ -213,11 +213,14 @@ base  %>% ggplot(aes(y=WAGP)) + geom_density()
 View(base$WAGP)
 base %>% group_by(TABLET) %>% select(WAGP) %>% summary()
 
+base %>% filter(TABLET=="Yes") %>% select(WAGP) %>% summary() #person does have tablet
+base %>% filter(TABLET=="No") %>% select(WAGP) %>% summary() #person doesn't have tablet
+
 base %>%  ggplot(aes(WAGP,color=TABLET)) + geom_density() + 
   labs(title="Earnings x Having Tablet",
        x ="Earnings", y = "Density") +
   scale_color_discrete(name="Person has Tablet",
-                      labels=c("Yes", "No", "NA"))
+                       labels=c("Yes", "No", "NA"))
 
 base %>%  ggplot(aes(x=TABLET,y=WAGP,fill=TABLET)) + geom_boxplot()+
   labs(title="Earnings x Having Tablet",
@@ -226,5 +229,3 @@ base %>%  ggplot(aes(x=TABLET,y=WAGP,fill=TABLET)) + geom_boxplot()+
                       breaks=c("1", "2", "NA"),
                       labels=c("Yes", "No", "NA"))
 
-base %>%  ggplot(aes(WAGP,color=SMARTPHONE)) + geom_density()
-base %>%  ggplot(aes(WAGP,color=HISPEED)) + geom_density()

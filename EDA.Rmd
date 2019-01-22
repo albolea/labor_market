@@ -1,9 +1,12 @@
 ---
-title: "EDA"
+title: "The Impact of Technology Access on Earnigs"
 author: "Group 06"
 date: "January 17, 2019"
 output:
-  html_document: default
+  html_document: 
+    toc: true
+    toc_depth: 2
+    toc_float: true
   pdf_document: default
   word_document: default
 ---
@@ -11,11 +14,12 @@ With a past of racial inequality in the southern states it would be interesting 
 In the state of Alabama, how to earnings vary by access to the internet/technology?
 Does the internet/technology premium vary by race and ethnicity?
 
-# step_1: clean the environment and import the library
-* The loaded librariesin the code are:
-1. tidyverse
-2. here 
-3. DataExplorer
+# Step_1: System Setup
+Before starting the program we need to clean the environment and import the library.
+The loaded librariesin the code are:
+  1. tidyverse
+  2. here 
+  3. DataExplorer
 ```{r setup, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 # Clear environment
 rm(list = ls(all = TRUE))
@@ -38,8 +42,12 @@ library(DataExplorer)
 source(here("code","function_convert_CSV_to_vector.R"))
 ```
 
-# step_2: import the raw data of ss16pal into the dataframe as "base"
-```{r}
+# Step_2: Import Data
+
+## Step_2.1: Import personal income Data
+
+Here we will import the raw data of personal income (ss16pal) into the dataframe as "base"
+```{r import_data, message=FALSE}
 #load the persional data to variable Base
 base <- read_csv(here('raw_data','ss16pal.csv'))%>% 
   select(SERIALNO, #Serial Number to link House Hold and Personal data
@@ -79,8 +87,11 @@ base <- read_csv(here('raw_data','ss16pal.csv'))%>%
          WKW)   #Weeks worked during past 12 months
 ```
 
-# step_3: import the raw data of ss16hal into the dataframe then merger it into "base"
-```{r}
+## Step_2.2: Import household Data
+
+We need to import the household level information (ss16hal) about technology access and merge the data into "base"
+
+```{r household_info, message=FALSE}
 #Link the house hould data
 househould <- read_csv(here('raw_data','ss16hal.csv'))%>% 
   select(SERIALNO, #Serial Number to link House Hold and Personal data
@@ -99,14 +110,16 @@ base <- base %>% left_join(househould) %>% select(-SERIALNO)
 rm(househould)
 ```
 
-# step_4: a peek of data structure, then convert the data type accordingly.
-```{r}
+# Step_3: First look of data structure.
+```{r first_look}
 str(base)
 ```
 
 
-# step_5: convert the categorical data into factor type and numetical data into numeric type. The factorial data in this dataframe will keep its representative code instead of the category name to save the memory space. 
-```{r}
+# Step_4: Converting data
+
+Convert the categorical data into factor type and numetical data into numeric type. The factorial data in this dataframe will keep its representative code instead of the category name to save the memory space. 
+```{r converting_data, message=FALSE}
 #conver the catagorical variable type
 base <- base %>% mutate(CIT = as.factor(CIT),
                         COW = as.factor(COW),
@@ -156,8 +169,9 @@ base <- base %>% mutate(AGEP = as.numeric(AGEP),
                         PERNP= as.numeric(PERNP)
                         )
 ```
-3. replace the factor level to the choices in the survery question for easy understanding.
-```{r}
+
+Replace the factor level to the choices in the survery question for easy understanding.
+```{r, message=FALSE}
 levels(base$ACCESS) <- convertCSV2Factor("ACCESS")
 levels(base$BROADBND) <- convertCSV2Factor("BROADBND")
 levels(base$CIT) <- convertCSV2Factor("CIT")
@@ -197,26 +211,22 @@ levels(base$TABLET) <- convertCSV2Factor("TABLET")
 levels(base$WAOB) <- convertCSV2Factor("WAOB")
 levels(base$WKW) <- convertCSV2Factor("WKW")
 ```
+==================
 
-# step_6: EDA
-## Step_6.1 EDA - Data Structure
+# Step_5: Exploratory data analysis - EDA
+
+## Step_5.1 EDA - Data Structure
 
 ```{r}
 str(base)
 ```
 
-## Step_6.2 EDA - Data Summary
+## Step_5.2 EDA - Data Summary
 ```{r}
 summary(base)
 ```
 
-
-
-
-
-# Exploratory data analysis
-
-*Age:
+## Step_5.3 EDA - Age:
 According to the graph and table below we see that our data includes people from 0 to 99 years old.
 ```{r eda_age}
 base %>% select(AGEP) %>%  summary()
@@ -230,7 +240,7 @@ base %>% select(AGEP) %>%  summary()
 base %>% ggplot(aes(AGEP)) + geom_density()  
 ```
 
-*Labor:  
+## Step_5.4 EDA - Labor:  
 We decided to exclude people:  
   1. Working without pay in family business or farm  
   2. Unemployed and last worked 5 years ago or earlier or never worked  
@@ -243,7 +253,7 @@ base <- base %>%  filter(as.integer(WKW)==1)
 ```  
 
 
-*Wage:  
+## Step_5.5 EDA - Wage:  
 Since the focus of our analysis is access to technology we can restrict the data by removing the rich and upper middle class (setting the max at the 3rd Quartile) because at a certain wage level we can conclude that technology becomes more about choice than access.  
 ```{r }
 base  %>% ggplot(aes(WAGP)) + geom_histogram()
@@ -257,7 +267,7 @@ base  %>% ggplot(aes(y=WAGP)) + geom_boxplot()
 
 ```
 
-* Missing data
+## Step_5.5 EDA - Missing data:
 ```{r}
 plot_missing(base)
 ```
@@ -271,15 +281,14 @@ base$DRATX <- NULL
 ```
 
 
-
-
-
-# Exploratory data analysis after restrictions
+# Step_6: Exploratory data analysis after restrictions
 ```{r }
 summary(base)
 ```
 
-#Examine access to the internet and its relation to earnings.
+==================
+
+# Step_7: Examine access to the internet and its relation to earnings.
 
 ```{r}
 base %>% select(ACCESS) %>% summary()
@@ -295,10 +304,11 @@ base %>%  filter(!is.na(ACCESS)) %>%
   ggplot() + geom_histogram(aes(x=WAGP,fill=ACCESS), binwidth = 10000) 
 ```
 
-#1.  Using Tablet as a proxy of Technology Access
+## Step_7.1 Using Tablet as a proxy of Technology Access
 
 ```{r }
-base %>% select(TABLET) %>% summary()
+#base %>% select(TABLET) %>% summary()
+plot_bar(base$TABLET)
 base %>% filter(TABLET=="Yes") %>% select(WAGP) %>% summary() #person have tablet
 base %>% filter(TABLET=="No") %>% select(WAGP) %>% summary() #person doesn't have tablet
 
@@ -313,12 +323,8 @@ base %>%  filter(!is.na(TABLET)) %>%
   ggplot() + geom_histogram(aes(x=WAGP,fill=TABLET), binwidth = 5000) 
 ```
 
-```{r}
 
-```
-
-
-#2.  Using Smartphone as a proxy of Technology Access
+## Step_7.2 Using Smartphone as a proxy of Technology Access
 ```{r }
 base %>% select(SMARTPHONE) %>% summary()
 base %>% filter(SMARTPHONE=="Yes") %>% select(WAGP) %>% summary() #person have smartphone
@@ -334,7 +340,7 @@ base %>%  filter(!is.na(SMARTPHONE)) %>%
 base %>%  filter(!is.na(SMARTPHONE)) %>%
   ggplot() + geom_histogram(aes(x=WAGP,fill=SMARTPHONE), binwidth = 5000) 
 ```
-#3.  Using Laptop as a proxy of Technology Access
+## Step_7.3 Using Laptop as a proxy of Technology Access
 ```{r }
 base %>% select(LAPTOP) %>% summary()
 base %>% filter(LAPTOP=="Yes") %>% select(WAGP) %>% summary() #person have Laptop
@@ -351,7 +357,7 @@ base %>%  filter(!is.na(LAPTOP)) %>%
   ggplot() + geom_histogram(aes(x=WAGP,fill=LAPTOP), binwidth = 5000)
 ```
 
-#4.  Using HIGH SPEED Internet as a proxy of Technology Access
+## Step_7.4 Using HIGH SPEED Internet as a proxy of Technology Access
 ```{r }
 base %>% select(HISPEED) %>% summary()
 base %>% filter(HISPEED=="Yes") %>% select(WAGP) %>% summary() #person have HIGH SPEED Internet
@@ -368,7 +374,7 @@ base %>%  filter(!is.na(HISPEED)) %>%
   ggplot() + geom_histogram(aes(x=WAGP,fill=HISPEED), binwidth = 5000)
 ```
 
-#5. Race and access to the internet
+## Step_7.5 Race and access to the internet
 
 ```{r}
 base %>% select(RAC1P) %>% summary()
@@ -381,6 +387,8 @@ base %>%  filter(!is.na(ACCESS)) %>%
   theme(legend.position= c(0.62,0.85))
 
 ```
+
+==================
 
 # Notes on variable selection and restriction
 
