@@ -2,7 +2,10 @@
 title: "EDA"
 author: "Group 06"
 date: "January 17, 2019"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
 ---
 # step_1: clean the environment and import the library
 * The loaded librariesin the code are:
@@ -218,7 +221,7 @@ base %>% ggplot(aes(AGEP)) + geom_histogram()
 
 We decided to work with people from 16 to 50 years olds as a better representations of the market labor
 ```{r eda_age_filter}
-base <- base %>%  filter(AGEP>=16 & AGEP <= 50)
+base <- base %>%  filter(AGEP>=16 & AGEP <= 60)
 base %>% select(AGEP) %>%  summary()
 base %>% ggplot(aes(AGEP)) + geom_density()  
 ```
@@ -375,8 +378,12 @@ base %>%  filter(!is.na(ACCESS)) %>%
 
 ```
 
-#6. Race and earnings
-```{r}
+# Notes on variable selection and restriction
 
-```
+By examining the relationship between earnings and access to technology we are able to see if an individuals earnings are at all effected by their level of access to technology. This is of particular interest when applied to the middle class and working poor. When performing variable selection and restriction, we chose to restrict the age variable to adults of working age from 16 to 60. Additionally, we chose to remove respondents who were working without pay, who are unemployed, or who have worked for less than 50 weeks.
+
+Once we restricted the work related variables, we examined the earnings variable (WAGP). Since our analysis is focused on access to technology we removed the top quartile of earnings. This is because over a certain earnings rate technology acquisition is based more on choice than access. We also restricted the lower rate to $1000, we did this to limit the respondents who claimed to have worked for at least 50 weeks but reported $0 in earnings.
+
+Lastly, we have a variable for access to the internet (ACCESS) but as a proxy for access to technology we have smartphones, tablets and laptops. At this point in our analysis we can determine that smartphones may not be a good proxy because it appears that almost every respondent has access to a smartphone. However, between tablets and laptops we may have wait until we start specifying our model to examine which variable to use as a proxy for access to technology.
+
 
