@@ -240,7 +240,7 @@ base <- base %>%  filter(as.integer(WKW)==1)
 Since the focus of our analysis is access to technology we can restrict the data by removing the rich and upper middle class (setting the max at the 3rd Quartile) because at a certain wage level we can conclude that technology becomes more about choice than access.  
 ```{r }
 base  %>% ggplot(aes(WAGP)) + geom_histogram()
-base <- base %>%  filter(WAGP<54000)
+base <- base %>%  filter(WAGP<54000 & WAGP > 1000)
 summary(base$WAGP)
 ```
 Our earnings distributions after this considerations is:
@@ -306,6 +306,10 @@ base %>%  filter(!is.na(TABLET)) %>%
   ggplot() + geom_histogram(aes(x=WAGP,fill=TABLET), binwidth = 5000) 
 ```
 
+```{r}
+
+```
+
 
 #2.  Using Smartphone as a proxy of Technology Access
 ```{r }
@@ -356,3 +360,23 @@ base %>%  filter(!is.na(HISPEED)) %>%
 base %>%  filter(!is.na(HISPEED)) %>%
   ggplot() + geom_histogram(aes(x=WAGP,fill=HISPEED), binwidth = 5000)
 ```
+
+#5. Race and access to the internet
+
+```{r}
+base %>% select(RAC1P) %>% summary()
+base %>% filter(ACCESS=="No access to the Internet at this house, apartment, or mobile home") %>% select(RAC1P) %>% summary() #person doesn't have ACCESS to Internet
+
+base %>%  filter(!is.na(ACCESS)) %>%
+  ggplot() + geom_bar(aes(x = RAC1P, fill=ACCESS)) + 
+  coord_flip() + 
+  scale_x_discrete(labels = c('White', 'Black', 'Native American', "Multiple tribes", "Asian", 'Pacific Islander', 'Other', 'Two or more Races')) +
+  theme(legend.position= c(0.62,0.85))
+
+```
+
+#6. Race and earnings
+```{r}
+
+```
+
