@@ -175,15 +175,31 @@ The dataframe is tidy as expected.
 summary(base)
 ```
 
-## Step_5.3 EDA - Age:
+## Step_5.3 EDA - Age
 - A brief of age dispersion
 ```{r eda_age}
 base %>% select(AGEP) %>%  summary()
+base %>% ggplot(aes(AGEP)) + geom_histogram(binwidth = 3, fill = "white", colour = "black") + xlab("Age") + ylab("Counts") + ggtitle("Age Dispersion") + theme(plot.title = element_text(hjust = 0.5))
 ```
-The ages of cases covered in the survey are ranging from 0 year old to 93 years old. There is no missing value under this category.
+
+The ages of cases covered in the survey are ranging from __0 year old to 93 years old__. There is __no missing value__ under the age category.
+
+According to the regulation from US Department of Labor, the legal working age is 14 (for most non-agricultural work), and the early retirement age is 62. This study will looks at the __age group of 14~62 years old (Data Filtering Criteria 1)__.  
 
 ```{r}
-base %>% ggplot(aes(AGEP)) + geom_histogram(binwidth = 3, fill = "white", colour = "black") + xlab("Age") + ylab("Counts") + ggtitle("Age Dispersion") + theme(plot.title = element_text(hjust = 0.5))
+base <- base %>% 
+        mutate( age_group = case_when(
+                            AGEP < 14 ~ "Other_Groups",
+                            AGEP >= 14 & AGEP <= 62 ~ "Age_14_to_62",
+                            AGEP > 62 ~ "Other_Groups"
+        ))
+base$age_group <- as.factor(base$age_group)
+```
+
+
+
+```{r}
+base %>% ggplot(aes(AGEP)) + geom_histogram(binwidth = 3, fill = "white", colour = "black") + xlab("Age") + ylab("Counts") + ggtitle("Age Dispersion\n This study focuses on the group in the age between 14 to 62") + theme(plot.title = element_text(hjust = 0.5)) + facet_grid(age_group ~ .)
 
 ```
 
