@@ -626,14 +626,17 @@ summary(base$WAGP)</code></pre>
 <p>Building the model</p>
 <pre class="r"><code>base_model &lt;- base %&gt;%  
   filter(!is.na(ACCESS) &amp; ACCESS != &quot;Paid Access&quot;) %&gt;%
-  mutate(free_access = ACCESS == &quot;Free Access&quot; ) 
+  mutate(free_access = ACCESS == &quot;Free Access&quot;,
+         hispanic = HISP != &quot;Not Spanish/Hispanic/Latino&quot;,
+         black = RACBLK == &quot;Yes&quot;
+         ) 
   
-model_01 &lt;- lm(WAGP ~ ACCESS, data = base_model)
+model_01 &lt;- lm(WAGP ~ free_access, data = base_model)
 
 model_01 %&gt;% summary()</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = WAGP ~ ACCESS, data = base_model)
+## lm(formula = WAGP ~ free_access, data = base_model)
 ## 
 ## Residuals:
 ##    Min     1Q Median     3Q    Max 
@@ -641,14 +644,36 @@ model_01 %&gt;% summary()</code></pre>
 ## 
 ## Coefficients:
 ##                 Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)      25385.3      738.7  34.364   &lt;2e-16 ***
-## ACCESSNo Access  -1267.9      831.8  -1.524    0.128    
+## (Intercept)      24117.5      382.4  63.076   &lt;2e-16 ***
+## free_accessTRUE   1267.9      831.8   1.524    0.128    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## Residual standard error: 12210 on 1290 degrees of freedom
 ## Multiple R-squared:  0.001798,   Adjusted R-squared:  0.001024 
 ## F-statistic: 2.323 on 1 and 1290 DF,  p-value: 0.1277</code></pre>
+<pre class="r"><code>model_02 &lt;- lm(WAGP ~ free_access + hispanic + black, data = base_model)
+model_02 %&gt;% summary()</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = WAGP ~ free_access + hispanic + black, data = base_model)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -25075  -9100  -1675   7900  29900 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)      25724.8      483.9  53.163  &lt; 2e-16 ***
+## free_accessTRUE    950.1      827.3   1.148   0.2510    
+## hispanicTRUE     -3740.7     1591.7  -2.350   0.0189 *  
+## blackTRUE        -3624.5      706.3  -5.132 3.32e-07 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 12080 on 1288 degrees of freedom
+## Multiple R-squared:  0.02337,    Adjusted R-squared:  0.0211 
+## F-statistic: 10.27 on 3 and 1288 DF,  p-value: 1.099e-06</code></pre>
 <p>==================</p>
 </div>
 </div>

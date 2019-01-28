@@ -227,11 +227,18 @@ Building the model
 ```{r}
 base_model <- base %>%  
   filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
-  mutate(free_access = ACCESS == "Free Access" ) 
+  mutate(free_access = ACCESS == "Free Access",
+         hispanic = HISP != "Not Spanish/Hispanic/Latino",
+         black = RACBLK == "Yes"
+         ) 
   
-model_01 <- lm(WAGP ~ ACCESS, data = base_model)
+model_01 <- lm(WAGP ~ free_access, data = base_model)
 
 model_01 %>% summary()
+
+model_02 <- lm(WAGP ~ free_access + hispanic + black, data = base_model)
+model_02 %>% summary()
+
 ```
 
 
