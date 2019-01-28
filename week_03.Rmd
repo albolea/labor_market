@@ -52,28 +52,8 @@ Here we will import the raw data of personal income (ss16pal) into the dataframe
 base <- read_csv(here('raw_data','ss16pal.csv'))%>% 
   select(SERIALNO, #Serial Number to link House Hold and Personal data
          AGEP,  # Age: 0#99
-         CIT,   # Citizenship status
-         COW,   # Class of worker
-         DDRS,  # Self#care difficulty
-         DEAR,  # Hearing difficulty
-         DEYE,  # Vision difficulty
-         DOUT,  # Independent living difficulty
-         DPHY,  # Ambulatory difficulty
-         DRAT,  # Veteran service connected disability rating (percentage)
-         DRATX, # Veteran service connected disability rating (checkbox)
-         DREM,  # Cognitive difficulty
-         ENG,   # Ability to speak English
-         JWMNP, # Travel time to work
-         JWRIP, # Vehicle occupancy
-         JWTR,  # Means of transportation to work
-         MAR,   # Marital status
-         MIL,   # Military service
-         NWLK,  # Looking for work
-         SCHL,  # Educational attainment
          SEMP,  # Self-employment income past 12 months (signed)
-         SEX,   # Sex
          WAGP,  # Wages or salary income past 12 months
-         ESR,   # Employment status recode
          HISP,  # Recoded detailed Hispanic origin
          NATIVITY,  # Nativity
          PERNP, # Total person's earnings
@@ -95,16 +75,7 @@ We need to import the household level information (ss16hal) about technology acc
 #Link the house hould data
 househould <- read_csv(here('raw_data','ss16hal.csv'))%>% 
   select(SERIALNO, #Serial Number to link House Hold and Personal data
-         TYPE, # Type of house
-         ACCESS, # Access to the Internet
-         BROADBND, # Cellular data plan for a smartphone or other mobile device
-         COMPOTHX, # Other computer equipment
-         HISPEED, #Broadband (high speed) Internet service such as cable, fiber optic, or DSL service
-         LAPTOP, # Laptop or desktop
-         OTHSVCEX, # Other Internet service
-         SATELLITE, # Satellite Internet service
-         SMARTPHONE, # Smartphone
-         TABLET # Tablet or other portable wireless computer
+        ACCESS # Access to the Internet
   )
 base <- base %>% left_join(househould) %>% select(-SERIALNO)
 rm(househould)
@@ -121,26 +92,7 @@ str(base)
 Convert the categorical data into factor type and numetical data into numeric type. The factorial data in this dataframe will keep its representative code instead of the category name to save the memory space. 
 ```{r converting_data, message=FALSE}
 #conver the catagorical variable type
-base <- base %>% mutate(CIT = as.factor(CIT),
-                        COW = as.factor(COW),
-                        DDRS = as.factor(DDRS),
-                        DEAR = as.factor(DEAR),
-                        DEYE = as.factor(DEYE),
-                        DOUT = as.factor(DOUT),
-                        DPHY = as.factor(DPHY),
-                        DRAT = as.factor(DRAT),
-                        DRATX = as.factor(DRATX),
-                        DREM = as.factor(DREM),
-                        ENG = as.factor(ENG),
-                        JWRIP = as.factor(JWRIP),
-                        JWTR = as.factor(JWTR),
-                        MAR = as.factor(MAR),
-                        MIL = as.factor(MIL),
-                        NWLK = as.factor(NWLK),
-                        SCHL = as.factor(SCHL),
-                        SEX = as.factor(SEX),
-                        ESR = as.factor(ESR),
-                        HISP= as.factor(HISP),
+base <- base %>% mutate(HISP= as.factor(HISP),
                         RAC1P= as.factor(RAC1P),
                         RACAIAN = as.factor(RACAIAN),
                         RACASN = as.factor(RACASN),
@@ -149,21 +101,11 @@ base <- base %>% mutate(CIT = as.factor(CIT),
                         RACWHT = as.factor(RACWHT),
                         WAOB = as.factor(WAOB),
                         WKW = as.factor(WKW),
-                        TYPE = as.factor(TYPE),
-                        ACCESS = as.factor(ACCESS),
-                        BROADBND = as.factor(BROADBND),
-                        COMPOTHX = as.factor(COMPOTHX),
-                        HISPEED = as.factor(HISPEED),
-                        LAPTOP = as.factor(LAPTOP),
-                        OTHSVCEX = as.factor(OTHSVCEX),
-                        SATELLITE = as.factor(SATELLITE),
-                        SMARTPHONE = as.factor(SMARTPHONE),
-                        TABLET = as.factor(TABLET)
+                        ACCESS = as.factor(ACCESS)
                         )
 
 #conver the numeric variable type
 base <- base %>% mutate(AGEP = as.numeric(AGEP),
-                        JWMNP = as.numeric(JWMNP),
                         SEMP= as.numeric(SEMP),
                         WAGP= as.numeric(WAGP),
                         PERNP= as.numeric(PERNP)
@@ -173,42 +115,13 @@ base <- base %>% mutate(AGEP = as.numeric(AGEP),
 Replace the factor level to the choices in the survery question for easy understanding.
 ```{r, message=FALSE}
 levels(base$ACCESS) <- convertCSV2Factor("ACCESS")
-levels(base$BROADBND) <- convertCSV2Factor("BROADBND")
-levels(base$CIT) <- convertCSV2Factor("CIT")
-levels(base$COMPOTHX) <- convertCSV2Factor("COMPOTHX")
-levels(base$COW) <- convertCSV2Factor("COW")
-levels(base$DDRS) <- convertCSV2Factor("DDRS")
-levels(base$DEAR) <- convertCSV2Factor("DEAR")
-levels(base$DEYE) <- convertCSV2Factor("DEYE")
-levels(base$DOUT) <- convertCSV2Factor("DOUT")
-levels(base$DOUT) <- convertCSV2Factor("DOUT")
-levels(base$DPHY) <- convertCSV2Factor("DPHY")
-levels(base$DRAT) <- convertCSV2Factor("DRAT")
-levels(base$DRATX) <- convertCSV2Factor("DRATX")
-levels(base$DREM) <- convertCSV2Factor("DREM")
-levels(base$ENG) <- convertCSV2Factor("ENG")
-levels(base$ESR) <- convertCSV2Factor("ESR")
 levels(base$HISP) <- convertCSV2Factor("HISP")
-levels(base$HISPEED) <- convertCSV2Factor("HISPEED")
-levels(base$JWRIP) <- convertCSV2Factor("JWRIP")
-levels(base$JWTR) <- convertCSV2Factor("JWTR")
-levels(base$LAPTOP) <- convertCSV2Factor("LAPTOP")
-levels(base$MAR) <- convertCSV2Factor("MAR")
-levels(base$MIL) <- convertCSV2Factor("MIL")
-levels(base$NWLK) <- convertCSV2Factor("NWLK")
-levels(base$OTHSVCEX) <- convertCSV2Factor("OTHSVCEX")
 levels(base$RAC1P) <- convertCSV2Factor("RAC1P")
 levels(base$RACAIAN) <- convertCSV2Factor("RACAIAN")
 levels(base$RACASN) <- convertCSV2Factor("RACASN")
 levels(base$RACBLK) <- convertCSV2Factor("RACBLK")
 levels(base$RACNH) <- convertCSV2Factor("RACNH")
 levels(base$RACWHT) <- convertCSV2Factor("RACWHT")
-levels(base$SATELLITE) <- convertCSV2Factor("SATELLITE")
-levels(base$SCHL) <- convertCSV2Factor("SCHL")
-levels(base$SEX) <- convertCSV2Factor("SEX")
-levels(base$SMARTPHONE) <- convertCSV2Factor("SMARTPHONE")
-levels(base$TABLET) <- convertCSV2Factor("TABLET")
-levels(base$WAOB) <- convertCSV2Factor("WAOB")
 levels(base$WKW) <- convertCSV2Factor("WKW")
 ```
 ==================
@@ -241,15 +154,10 @@ base %>% ggplot(aes(AGEP)) + geom_density()
 ```
 
 ## Step_5.4 EDA - Labor:  
-We decided to exclude people:  
-  1. Working without pay in family business or farm  
-  2. Unemployed and last worked 5 years ago or earlier or never worked  
+We decided to exclude people:   
+  1. Worked less than 40 weeks in the last 12 months
 ```{r }
-base <- base %>%  filter(as.integer(COW)<8)
-```
-  3. Worked less than 50 weeks in the last 12 months
-```{r }
-base <- base %>%  filter(as.integer(WKW)==1)
+base <- base %>%  filter(as.integer(WKW)<4)
 ```  
 
 
@@ -272,14 +180,6 @@ base  %>% ggplot(aes(y=WAGP)) + geom_boxplot()
 plot_missing(base)
 ```
 
-Since the variable of "DRATX", "ENG", "DRAT" have numerous missing data that lead these three vairable as "un-representative," so this study will remove these three variables.
-
-```{r}
-base$DRAT <- NULL
-base$ENG <- NULL
-base$DRATX <- NULL
-```
-
 
 # Step_6: Exploratory data analysis after restrictions
 ```{r }
@@ -293,85 +193,20 @@ summary(base)
 ```{r}
 base %>% select(ACCESS) %>% summary()
 
-base %>%  filter(!is.na(ACCESS)) %>% 
+base %>%  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>% 
   ggplot(aes(WAGP,color=ACCESS)) + geom_density() + 
   labs(title="Earnings x Access to the internet",
        x ="Earnings", y = "Density") +
   scale_color_discrete(name="Internet Access",
-                      labels=c("Paid Access", "Free Access", "No Access"))
+                      labels=c("Free Access", "No Access"))
 
-base %>%  filter(!is.na(ACCESS)) %>%
+base %>%  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
   ggplot() + geom_histogram(aes(x=WAGP,fill=ACCESS), binwidth = 10000) 
-```
 
-## Step_7.1 Using Tablet as a proxy of Technology Access
-
-```{r }
-#base %>% select(TABLET) %>% summary()
-plot_bar(base$TABLET)
-base %>% filter(TABLET=="Yes") %>% select(WAGP) %>% summary() #person have tablet
-base %>% filter(TABLET=="No") %>% select(WAGP) %>% summary() #person doesn't have tablet
-
-base %>%  filter(!is.na(TABLET)) %>%
-  ggplot(aes(WAGP,color=TABLET)) + geom_density() + 
-  labs(title="Earnings x Having Tablet",
-       x ="Earnings", y = "Density") +
-  scale_color_discrete(name="Person has Tablet",
-                      labels=c("Yes", "No"))
-
-base %>%  filter(!is.na(TABLET)) %>%
-  ggplot() + geom_histogram(aes(x=WAGP,fill=TABLET), binwidth = 5000) 
-```
-
-
-## Step_7.2 Using Smartphone as a proxy of Technology Access
-```{r }
-base %>% select(SMARTPHONE) %>% summary()
-base %>% filter(SMARTPHONE=="Yes") %>% select(WAGP) %>% summary() #person have smartphone
-base %>% filter(SMARTPHONE=="No") %>% select(WAGP) %>% summary() #person doesn't have smartphone
-
-base %>%  filter(!is.na(SMARTPHONE)) %>%
-  ggplot(aes(WAGP,color=SMARTPHONE)) + geom_density() + 
-  labs(title="Earnings x Having Smartphone",
-       x ="Earnings", y = "Density") +
-  scale_color_discrete(name="Person has Smartphone",
-                      labels=c("Yes", "No"))
-
-base %>%  filter(!is.na(SMARTPHONE)) %>%
-  ggplot() + geom_histogram(aes(x=WAGP,fill=SMARTPHONE), binwidth = 5000) 
-```
-## Step_7.3 Using Laptop as a proxy of Technology Access
-```{r }
-base %>% select(LAPTOP) %>% summary()
-base %>% filter(LAPTOP=="Yes") %>% select(WAGP) %>% summary() #person have Laptop
-base %>% filter(LAPTOP=="No") %>% select(WAGP) %>% summary() #person doesn't have Laptop
-
-base %>%  filter(!is.na(LAPTOP)) %>%
-  ggplot(aes(WAGP,color=LAPTOP)) + geom_density() + 
-  labs(title="Earnings x Having Laptop",
-       x ="Earnings", y = "Density") +
-  scale_color_discrete(name="Person has Laptop",
-                      labels=c("Yes", "No"))
-
-base %>%  filter(!is.na(LAPTOP)) %>%
-  ggplot() + geom_histogram(aes(x=WAGP,fill=LAPTOP), binwidth = 5000)
-```
-
-## Step_7.4 Using HIGH SPEED Internet as a proxy of Technology Access
-```{r }
-base %>% select(HISPEED) %>% summary()
-base %>% filter(HISPEED=="Yes") %>% select(WAGP) %>% summary() #person have HIGH SPEED Internet
-base %>% filter(HISPEED=="No") %>% select(WAGP) %>% summary() #person doesn't have HIGH SPEED Internet
-
-base %>%  filter(!is.na(HISPEED)) %>%
-  ggplot(aes(WAGP,color=HISPEED)) + geom_density() + 
-  labs(title="Earnings x Having High Speed Internet",
-       x ="Earnings", y = "Density") +
-  scale_color_discrete(name="Person has High Speed Internet",
-                      labels=c("Yes", "No"))
-
-base %>%  filter(!is.na(HISPEED)) %>%
-  ggplot() + geom_histogram(aes(x=WAGP,fill=HISPEED), binwidth = 5000)
+base %>%  
+  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>% 
+  group_by(ACCESS, RAC1P) %>% 
+  summarise (mean(WAGP),sd(WAGP),min(WAGP),max(WAGP), median(WAGP))
 ```
 
 ## Step_7.5 Race and access to the internet
@@ -380,13 +215,25 @@ base %>%  filter(!is.na(HISPEED)) %>%
 base %>% select(RAC1P) %>% summary()
 base %>% filter(ACCESS=="No Access") %>% select(RAC1P) %>% summary() #person doesn't have ACCESS to Internet
 
-base %>%  filter(!is.na(ACCESS)) %>%
+base %>%  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
   ggplot() + geom_bar(aes(x = RAC1P, fill=ACCESS)) + 
   coord_flip() + 
   scale_x_discrete(labels = c('White', 'Black', 'Native American', "Multiple tribes", "Asian", 'Pacific Islander', 'Other', 'Two or more Races')) +
   theme(legend.position= c(0.62,0.85))
 
 ```
+
+Building the model
+```{r}
+base_model <- base %>%  
+  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
+  mutate(free_access = ACCESS == "Free Access" ) 
+  
+model_01 <- lm(WAGP ~ ACCESS, data = base_model)
+
+model_01 %>% summary()
+```
+
 
 ==================
 
