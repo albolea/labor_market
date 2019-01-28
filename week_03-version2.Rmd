@@ -1,0 +1,291 @@
+---
+title: "The Impact of Technology Access on Earnigs"
+author: "Group 06"
+date: "January 28, 2019"
+output:
+  html_document: 
+    toc: true
+    toc_depth: 2
+    toc_float: true
+  pdf_document: default
+  word_document: default
+---
+# Step_0: Research Question and Variable Selection
+
+__Research Questions:__ \n
+
+With a past of racial inequality in the southern states it would be interesting to examine how race/ethnicity is related to access to the internet and other technologies and how not having or having access could effect a persons earnings. This can be explored via the following research questions:\n
+
+  1. In the state of Alabama, how to earnings vary by access to the internet/technology?
+  2. Does the internet/technology premium vary by race and ethnicity?
+
+__Variable Selection__:\n
+
+To answer the research questions, this study looks at the variables which will reveal the demographic characteristics - such as "age" or "race"; socioeconomic status - such as "employment status" or "wage"; and the access to techonlogy - such as "access to internet."\n
+
+- The following variables will be included in this study. (Some other varialbes will be used as connector when joining tables but will not be included in the final dataframe.) \n
+
+  1. AGEP # Age: 0#99
+  2. SEMP # Self-employment income past 12 months (signed)
+  3. WAGP # Wages or salary income past 12 months
+  4. HISP # Recoded detailed Hispanic origin
+  5. NATIVITY # Nativity
+  6. PERNP # Total person's earnings
+  7. RAC1P # Recoded detailed race code
+  8. RACAIAN # American Indian and Alaska Native recode
+  9. RACASN # Asian recode
+  10. RACBLK # Black or African American recode
+  11. RACNH # Native Hawaiian recode
+  12. RACWHT # White recode
+  13. WAOB # World area of birth
+  14. WKW #Weeks worked during past 12 months
+  15. ACCESS # Access to the Internet
+
+- 
+
+# Step_1: System Setup
+Before starting the program we need to clean the environment and import the library.\n
+
+The loaded librariesin the code are:\n
+
+  1. tidyverse
+  2. here 
+  3. DataExplorer
+  
+```{r setup, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+# Clear environment
+rm(list = ls(all = TRUE))
+
+# check if package is installed, if not installed then load
+if(!require(here)){
+  install.packages("here")
+}
+library(here)
+
+if(!require(tidyverse)){
+  install.packages("tidyverse")
+}
+library(tidyverse)
+
+if(!require(DataExplorer)){
+  install.packages("DataExplorer")
+}
+library(DataExplorer)
+
+source(here("code","function_convert_CSV_to_vector.R"))
+```
+
+# Step_2: Import Data
+
+## Step_2.1: Import personal income Data
+
+Here we will import the raw data of personal income (ss16pal) into the dataframe as "base."
+```{r import_data, message=FALSE}
+#load the persional data to variable Base
+base <- read_csv(here('raw_data','ss16pal.csv'))%>% 
+  select(SERIALNO, #Serial Number to link House Hold and Personal data
+         AGEP,  # Age: 0#99
+         SEMP,  # Self-employment income past 12 months (signed)
+         WAGP,  # Wages or salary income past 12 months
+         HISP,  # Recoded detailed Hispanic origin
+         NATIVITY,  # Nativity
+         PERNP, # Total person's earnings
+         RAC1P, # Recoded detailed race code
+         RACAIAN, # American Indian and Alaska Native recode
+         RACASN,  # Asian recode
+         RACBLK,  # Black or African American recode
+         RACNH, # Native Hawaiian recode
+         RACWHT,  # White recode
+         WAOB,  # World area of birth
+         WKW)   #Weeks worked during past 12 months
+```
+
+## Step_2.2: Import household Data
+
+We need to import the household level information (ss16hal) about internet access and merge the data into "base."
+
+```{r household_info, message=FALSE}
+#Link the house hould data
+househould <- read_csv(here('raw_data','ss16hal.csv'))%>% 
+  select(SERIALNO, #Serial Number to link House Hold and Personal data
+        ACCESS # Access to the Internet
+  )
+base <- base %>% left_join(househould) %>% select(-SERIALNO)
+rm(househould)
+```
+
+# Step_3: First look of data structure.
+```{r first_look}
+str(base)
+```
+Accoring to the first observation, some ordinary data will be converted into numerical type, and some categorical data will be converted into factor type. 
+
+
+# Step_4: Converting data
+
+Convert the categorical data into factor type and numetical data into numeric type. The factorial data in this dataframe will keep its representative code instead of the category name to save the memory space. 
+```{r converting_data, message=FALSE}
+#conver the catagorical variable type
+base <- base %>% mutate(HISP= as.factor(HISP),
+                        RAC1P= as.factor(RAC1P),
+                        RACAIAN = as.factor(RACAIAN),
+                        RACASN = as.factor(RACASN),
+                        RACBLK = as.factor(RACBLK),
+                        RACNH = as.factor(RACNH),
+                        RACWHT = as.factor(RACWHT),
+                        WAOB = as.factor(WAOB),
+                        WKW = as.factor(WKW),
+                        ACCESS = as.factor(ACCESS)
+                        )
+
+#conver the numeric variable type
+base <- base %>% mutate(AGEP = as.numeric(AGEP),
+                        SEMP= as.numeric(SEMP),
+                        WAGP= as.numeric(WAGP),
+                        PERNP= as.numeric(PERNP)
+                        )
+```
+
+Replace the factor level to the choices in the survery question for easy understanding.
+```{r, message=FALSE}
+levels(base$ACCESS) <- convertCSV2Factor("ACCESS")
+levels(base$HISP) <- convertCSV2Factor("HISP")
+levels(base$RAC1P) <- convertCSV2Factor("RAC1P")
+levels(base$RACAIAN) <- convertCSV2Factor("RACAIAN")
+levels(base$RACASN) <- convertCSV2Factor("RACASN")
+levels(base$RACBLK) <- convertCSV2Factor("RACBLK")
+levels(base$RACNH) <- convertCSV2Factor("RACNH")
+levels(base$RACWHT) <- convertCSV2Factor("RACWHT")
+levels(base$WKW) <- convertCSV2Factor("WKW")
+```
+==================
+
+# Step_5: EDA and Data Filtering 
+
+## Step_5.1 EDA - Data Structure
+- A brief of data structure
+```{r}
+str(base)
+```
+The dataframe is tidy as expected.
+
+## Step_5.2 EDA - Data Summary
+- A brief of data summary
+```{r}
+summary(base)
+```
+
+## Step_5.3 EDA - Age:
+- A brief of age dispersion
+```{r eda_age}
+base %>% select(AGEP) %>%  summary()
+```
+The ages of cases covered in the survey are ranging from 0 year old to 93 years old. There is no missing value under this category.
+
+```{r}
+base %>% ggplot(aes(AGEP)) + geom_histogram(binwidth = 3, fill = "white", colour = "black") + xlab("Age") + ylab("Counts") + ggtitle("Age Dispersion") + theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+
+We decided to work with people from 16 to 50 years olds as a better representations of the market labor
+```{r eda_age_filter}
+base <- base %>%  filter(AGEP>=16 & AGEP <= 60)
+base %>% select(AGEP) %>%  summary()
+base %>% ggplot(aes(AGEP)) + geom_density()  
+```
+
+## Step_5.4 EDA - Labor:  
+We decided to exclude people:   
+  1. Worked less than 40 weeks in the last 12 months
+```{r }
+base <- base %>%  filter(as.integer(WKW)<4)
+```  
+
+
+## Step_5.5 EDA - Wage:  
+Since the focus of our analysis is access to technology we can restrict the data by removing the rich and upper middle class (setting the max at the 3rd Quartile) because at a certain wage level we can conclude that technology becomes more about choice than access.  
+```{r }
+base  %>% ggplot(aes(WAGP)) + geom_histogram()
+base <- base %>%  filter(WAGP<54000 & WAGP > 1000)
+summary(base$WAGP)
+```
+Our earnings distributions after this considerations is:
+```{r }
+base  %>% ggplot(aes(WAGP)) + geom_density()
+base  %>% ggplot(aes(y=WAGP)) + geom_boxplot()
+
+```
+
+## Step_5.5 EDA - Missing data:
+```{r}
+plot_missing(base)
+```
+
+
+# Step_6: Exploratory data analysis after restrictions
+```{r }
+summary(base)
+```
+
+==================
+
+# Step_7: Examine access to the internet and its relation to earnings.
+
+```{r}
+base %>% select(ACCESS) %>% summary()
+
+base %>%  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>% 
+  ggplot(aes(WAGP,color=ACCESS)) + geom_density() + 
+  labs(title="Earnings x Access to the internet",
+       x ="Earnings", y = "Density") +
+  scale_color_discrete(name="Internet Access",
+                      labels=c("Free Access", "No Access"))
+
+base %>%  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
+  ggplot() + geom_histogram(aes(x=WAGP,fill=ACCESS), binwidth = 10000) 
+
+base %>%  
+  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>% 
+  group_by(ACCESS, RAC1P) %>% 
+  summarise (mean(WAGP),sd(WAGP),min(WAGP),max(WAGP), median(WAGP))
+```
+
+## Step_7.5 Race and access to the internet
+
+```{r}
+base %>% select(RAC1P) %>% summary()
+base %>% filter(ACCESS=="No Access") %>% select(RAC1P) %>% summary() #person doesn't have ACCESS to Internet
+
+base %>%  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
+  ggplot() + geom_bar(aes(x = RAC1P, fill=ACCESS)) + 
+  coord_flip() + 
+  scale_x_discrete(labels = c('White', 'Black', 'Native American', "Multiple tribes", "Asian", 'Pacific Islander', 'Other', 'Two or more Races')) +
+  theme(legend.position= c(0.62,0.85))
+
+```
+
+Building the model
+```{r}
+base_model <- base %>%  
+  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
+  mutate(free_access = ACCESS == "Free Access" ) 
+  
+model_01 <- lm(WAGP ~ ACCESS, data = base_model)
+
+model_01 %>% summary()
+```
+
+
+==================
+
+# Notes on variable selection and restriction
+
+By examining the relationship between earnings and access to technology we are able to see if an individuals earnings are at all effected by their level of access to technology. This is of particular interest when applied to the middle class and working poor. When performing variable selection and restriction, we chose to restrict the age variable to adults of working age from 16 to 60. Additionally, we chose to remove respondents who were working without pay, who are unemployed, or who have worked for less than 50 weeks.
+
+Once we restricted the work related variables, we examined the earnings variable (WAGP). Since our analysis is focused on access to technology we removed the top quartile of earnings. This is because over a certain earnings rate technology acquisition is based more on choice than access. We also restricted the lower rate to $1000, we did this to limit the respondents who claimed to have worked for at least 50 weeks but reported $0 in earnings.
+
+Lastly, we have a variable for access to the internet (ACCESS) but as a proxy for access to technology we have smartphones, tablets and laptops. At this point in our analysis we can determine that smartphones may not be a good proxy because it appears that almost every respondent has access to a smartphone. However, between tablets and laptops we may have wait until we start specifying our model to examine which variable to use as a proxy for access to technology.
+
+
