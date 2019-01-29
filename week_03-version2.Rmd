@@ -41,7 +41,6 @@ To answer the research questions, this study looks at the variables which will r
   14. WKW #Weeks worked during past 12 months
   15. ACCESS # Access to the Internet
 
-- 
 
 # Step_1: System Setup
 Before starting the program we need to clean the environment and import the library.\n
@@ -75,9 +74,9 @@ library(DataExplorer)
 source(here("code","function_convert_CSV_to_vector.R"))
 ```
 
-# Step_2: Import Data
+# Step_2: Data Cleaning
 
-## Step_2.1: Import personal income Data
+## Step_2.1: Import the raw data
 
 Here we will import the raw data of personal income (ss16pal) into the dataframe as "base."
 ```{r import_data, message=FALSE}
@@ -100,8 +99,6 @@ base <- read_csv(here('raw_data','ss16pal.csv'))%>%
          WKW)   #Weeks worked during past 12 months
 ```
 
-## Step_2.2: Import household Data
-
 We need to import the household level information (ss16hal) about internet access and merge the data into "base."
 
 ```{r household_info, message=FALSE}
@@ -114,14 +111,14 @@ base <- base %>% left_join(househould) %>% select(-SERIALNO)
 rm(househould)
 ```
 
-# Step_3: First look of data structure.
+## Step_2.2: Structure of raw data
 ```{r first_look}
 str(base)
 ```
 Accoring to the first observation, some ordinary data will be converted into numerical type, and some categorical data will be converted into factor type. 
 
 
-# Step_4: Converting data
+## Step_2.3: Convert the variable types
 
 Convert the categorical data into factor type and numetical data into numeric type. The factorial data in this dataframe will keep its representative code instead of the category name to save the memory space. 
 ```{r converting_data, message=FALSE}
@@ -135,7 +132,8 @@ base <- base %>% mutate(HISP= as.factor(HISP),
                         RACWHT = as.factor(RACWHT),
                         WAOB = as.factor(WAOB),
                         WKW = as.factor(WKW),
-                        ACCESS = as.factor(ACCESS)
+                        ACCESS = as.factor(ACCESS),
+                        NATIVITY = as.factor(NATIVITY)
                         )
 
 #conver the numeric variable type
@@ -157,97 +155,154 @@ levels(base$RACBLK) <- convertCSV2Factor("RACBLK")
 levels(base$RACNH) <- convertCSV2Factor("RACNH")
 levels(base$RACWHT) <- convertCSV2Factor("RACWHT")
 levels(base$WKW) <- convertCSV2Factor("WKW")
+levels(base$WAOB) <- convertCSV2Factor("WAOB")
+levels(base$NATIVITY) <- convertCSV2Factor("NATIVITY")
 ```
 ==================
 
-# Step_5: EDA and Data Filtering 
+# Step_3: EDA
 
-## Step_5.1 EDA - Data Structure
-- A brief of data structure
-```{r}
+## Step_3.1 Brief of data structure
+```{r echo=FALSE}
 str(base)
 ```
-The dataframe is tidy as expected.
 
-## Step_5.2 EDA - Data Summary
-- A brief of data summary
-```{r}
+## Step_3.2 Brief of data summary
+```{r echo=FALSE}
 summary(base)
 ```
 
-## Step_5.3 EDA - Age
-- A brief of age dispersion
+## Step_3.3 Missing data
+```{r echo=FALSE}
+plot_missing(base)
+```
+The variable of "WKW", Weeks worked during past 12 months, has a great amount of missing data.
+
+## Step_3.4 Brief of "Age Dispersion"
+
 ```{r eda_age}
 base %>% select(AGEP) %>%  summary()
 base %>% ggplot(aes(AGEP)) + geom_histogram(binwidth = 3, fill = "white", colour = "black") + xlab("Age") + ylab("Counts") + ggtitle("Age Dispersion") + theme(plot.title = element_text(hjust = 0.5))
 ```
 
+## Step_3.5 Brief of "Wage"
+
+- Summary of wages 
+```{r}
+summary(base$WAGP)
+```
+
+- Box plot of wages
+```{r warning=FALSE}
+ggplot(data = base, aes(y = WAGP)) + geom_boxplot()  + coord_flip() + ylab("Wage") + ggtitle("Wage - Box Plot") + theme(plot.title = element_text(hjust = 0.5))
+```
+- Density of wages
+```{r warning=FALSE}
+base  %>% ggplot(aes(x = WAGP)) + geom_density() + xlab("Wage") +ylab("Density") + ggtitle("Wage - Density") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+- Box plot of wages by races
+```{r warning=FALSE}
+ggplot(data = base, aes(x = RAC1P, y = WAGP)) + geom_boxplot() + coord_flip() + xlab("Race") + ylab("Wage") + ggtitle("Wage by Races - Box Plot") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+- Density of wages by races
+```{r warning=FALSE}
+ggplot(data = base, aes(x = WAGP, fill = RAC1P)) + geom_density(alpha = .2) + xlab("Wage") + ylab("Density") + ggtitle("Wage by Races - Density") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+__Note:__ \n
+
+category in the graph above | corresponding title in the survey
+----------------------------|----------------------------------
+Two more | Two or More Races
+Others | Some Other Race alone
+Hawaiian | Native Hawaiian and Other Pacific Islander alone
+Asian | Asian alone
+Tribes or Others | American Indian and Alaska Native tribes specified; or American Indian or Alaska Native, not specified and no other races
+American Indian | American Indian alone
+African American | Black or African American alone
+White | White alone
+
+## Step_3.6 Brief of "Access to Internet"
+
+- Summary of access to internet
+```{r}
+summary(base$ACCESS)
+
+```
+```{r}
+ggplot(data = base, aes(x = ACCESS)) + geom_bar() + xlab("") + ylab("Sum of Access to Internet") + coord_flip() + ggtitle("Summary of Access to Internet") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+- Summary of access to internet by races
+```{r}
+base2 <- base %>% 
+        select(c("RAC1P","ACCESS")) %>% 
+        group_by(RAC1P, ACCESS) %>% 
+        summarise(counts = n())
+```
+
+```{r}
+ggplot(data = base2, aes(x = ACCESS, y = counts, fill = RAC1P)) + geom_col(position = "dodge") + coord_flip() + xlab("") + ylab("Sum of Access to Internet")  + ggtitle("Summary of Access to Internet") + theme(plot.title = element_text(hjust = 0.5)) + labs(fill = "Race")
+rm("base2")
+```
+
+# Step_4: Criteria for filtering the data
+__1. Tolerance for missing data: __
+
+The tolerance for missing date varies by research topic. The tolerance for missing data is arbitory in this study is arbitrarily set at 50% - __the missing records in a variable should not be more than half of the total observations (Data Filtering Criteria 1)__.   
+
+Because the variable of __"WKW"__, weeks worked during past 12 months, has about 53.34% of missing data over all observation, this variable will be __REMOVED__. 
+
+```{r}
+base$WKW <- NULL
+```
+__2. Age range: __
+
 The ages of cases covered in the survey are ranging from __0 year old to 93 years old__. There is __no missing value__ under the age category.
 
-According to the regulation from US Department of Labor, the legal working age is 14 (for most non-agricultural work), and the early retirement age is 62. This study will looks at the __age group of 14~62 years old (Data Filtering Criteria 1)__.  
+According to the regulation from US Department of Labor, the legal working age is 14 (for most non-agricultural work), and the early retirement age is 62. This study will looks at the __age group of 14~62 years old (Data Filtering Criteria 2)__.  
 
 ```{r}
 base <- base %>% 
         mutate( age_group = case_when(
-                            AGEP < 14 ~ "Other_Groups",
-                            AGEP >= 14 & AGEP <= 62 ~ "Age_14_to_62",
-                            AGEP > 62 ~ "Other_Groups"
+                            AGEP < 14 ~ "Other ages (exclude)",
+                            AGEP >= 14 & AGEP <= 62 ~ "Age 14-62 (include)",
+                            AGEP > 62 ~ "Other ages (exclude)"
         ))
 base$age_group <- as.factor(base$age_group)
 ```
-
-
 
 ```{r}
 base %>% ggplot(aes(AGEP)) + geom_histogram(binwidth = 3, fill = "white", colour = "black") + xlab("Age") + ylab("Counts") + ggtitle("Age Dispersion\n This study focuses on the group in the age between 14 to 62") + theme(plot.title = element_text(hjust = 0.5)) + facet_grid(age_group ~ .)
 
 ```
 
+Remove the records which are out of the age group of 14 to 62.  
 
-
-We decided to work with people from 16 to 50 years olds as a better representations of the market labor
 ```{r eda_age_filter}
-base <- base %>%  filter(AGEP>=16 & AGEP <= 60)
-base %>% select(AGEP) %>%  summary()
-base %>% ggplot(aes(AGEP)) + geom_density()  
+base <- base %>%  filter(AGEP>=14 & AGEP <= 62)
+base$age_group <- NULL
 ```
 
-## Step_5.4 EDA - Labor:  
-We decided to exclude people:   
-  1. Worked less than 40 weeks in the last 12 months
-```{r }
-base <- base %>%  filter(as.integer(WKW)<4)
-```  
+__3. Wage: __
 
+This study excludes the out-liers of super rich and upper level, which do not contribute to the discussion of premium from access to internet. Considering the hourly wage in US was $7.25 back to 2014 and this study considering people working more than 40 weeks as the full time employees, this minimum income for full-time emloyees would be 7.25 USD/Hour * 40 Weeks * 40 Hours/Week = 11600 USD. __Yearly wage from 11,600 up to the third quartile(54,000) will be included in this study (Data Filtering Criteria 2)__. The miss data and rests will be removed.   
 
-## Step_5.5 EDA - Wage:  
-Since the focus of our analysis is access to technology we can restrict the data by removing the rich and upper middle class (setting the max at the 3rd Quartile) because at a certain wage level we can conclude that technology becomes more about choice than access.  
-```{r }
-base  %>% ggplot(aes(WAGP)) + geom_histogram()
-base <- base %>%  filter(WAGP<54000 & WAGP > 1000)
-summary(base$WAGP)
-```
-Our earnings distributions after this considerations is:
-```{r }
-base  %>% ggplot(aes(WAGP)) + geom_density()
-base  %>% ggplot(aes(y=WAGP)) + geom_boxplot()
-
-```
-
-## Step_5.5 EDA - Missing data:
 ```{r}
-plot_missing(base)
+base <- base %>%  filter(WAGP<54000 & WAGP > 11600)
 ```
 
-
-# Step_6: Exploratory data analysis after restrictions
+# Step_5: Data summary - After the restriction
 ```{r }
 summary(base)
 ```
 
+
 ==================
 
-# Step_7: Examine access to the internet and its relation to earnings.
+# Step_6: Examine access to the internet and its relation to earnings.
 
 ```{r}
 base %>% select(ACCESS) %>% summary()
@@ -268,7 +323,7 @@ base %>%
   summarise (mean(WAGP),sd(WAGP),min(WAGP),max(WAGP), median(WAGP))
 ```
 
-## Step_7.5 Race and access to the internet
+## Step_7 Race and access to the internet
 
 ```{r}
 base %>% select(RAC1P) %>% summary()
@@ -282,26 +337,24 @@ base %>%  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
 
 ```
 
-Building the model
+__Building the model__
 ```{r}
 base_model <- base %>%  
   filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
-  mutate(free_access = ACCESS == "Free Access" ) 
+  mutate(free_access = ACCESS == "Free Access",
+         hispanic = HISP != "Not Spanish/Hispanic/Latino",
+         black = RACBLK == "Yes"
+         ) 
   
-model_01 <- lm(WAGP ~ ACCESS, data = base_model)
+model_01 <- lm(WAGP ~ free_access, data = base_model)
 
 model_01 %>% summary()
+
+model_02 <- lm(WAGP ~ free_access + hispanic + black, data = base_model)
+model_02 %>% summary()
 ```
 
 
-==================
 
-# Notes on variable selection and restriction
-
-By examining the relationship between earnings and access to technology we are able to see if an individuals earnings are at all effected by their level of access to technology. This is of particular interest when applied to the middle class and working poor. When performing variable selection and restriction, we chose to restrict the age variable to adults of working age from 16 to 60. Additionally, we chose to remove respondents who were working without pay, who are unemployed, or who have worked for less than 50 weeks.
-
-Once we restricted the work related variables, we examined the earnings variable (WAGP). Since our analysis is focused on access to technology we removed the top quartile of earnings. This is because over a certain earnings rate technology acquisition is based more on choice than access. We also restricted the lower rate to $1000, we did this to limit the respondents who claimed to have worked for at least 50 weeks but reported $0 in earnings.
-
-Lastly, we have a variable for access to the internet (ACCESS) but as a proxy for access to technology we have smartphones, tablets and laptops. At this point in our analysis we can determine that smartphones may not be a good proxy because it appears that almost every respondent has access to a smartphone. However, between tablets and laptops we may have wait until we start specifying our model to examine which variable to use as a proxy for access to technology.
 
 
