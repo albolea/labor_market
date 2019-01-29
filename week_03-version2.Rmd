@@ -194,7 +194,7 @@ summary(base$WAGP)
 
 - Box plot of wages
 ```{r warning=FALSE}
-ggplot(data = base, aes(y = WAGP)) + geom_boxplot()  + coord_flip() + ylab("Wage") + ggtitle("Wage - Box Plot") + theme(plot.title = element_text(hjust = 0.5))
+base %>% ggplot(aes(WAGP)) + geom_histogram(binwidth = 10000, fill = "white", colour = "black") + xlab("Wage") + ylab("Counts") + ggtitle("Wage Dispersion") + theme(plot.title = element_text(hjust = 0.5))
 ```
 - Density of wages
 ```{r warning=FALSE}
@@ -213,7 +213,7 @@ ggplot(data = base, aes(x = WAGP, fill = RAC1P)) + geom_density(alpha = .2) + xl
 
 __Note:__ \n
 
-category in the graph above | corresponding title in the survey
+category in the graphs above | corresponding title in the survey
 ----------------------------|----------------------------------
 Two more | Two or More Races
 Others | Some Other Race alone
@@ -332,8 +332,9 @@ base %>% filter(ACCESS=="No Access") %>% select(RAC1P) %>% summary() #person doe
 base %>%  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
   ggplot() + geom_bar(aes(x = RAC1P, fill=ACCESS)) + 
   coord_flip() + 
+  xlab('Race') +
   scale_x_discrete(labels = c('White', 'Black', 'Native American', "Multiple tribes", "Asian", 'Pacific Islander', 'Other', 'Two or more Races')) +
-  theme(legend.position= c(0.62,0.85))
+  theme(legend.position= c(0.87,0.85))
 
 ```
 
