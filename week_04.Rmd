@@ -86,7 +86,7 @@ source(here("code","function_convert_CSV_to_vector.R"))
 ## 2.1 Import the raw data
 
 Import the raw data of personal income (ss16pal) into the dataframe of "base."
-```{r import_data, message=FALSE}
+```{r import_data, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 #load the persional data to variable Base
 base <- read_csv(here('raw_data','ss16pal.csv'))%>% 
   select(SERIALNO, #Serial Number to link House Hold and Personal data
@@ -109,7 +109,7 @@ base <- read_csv(here('raw_data','ss16pal.csv'))%>%
 ```
 
 Import the household level information (ss16hal) about internet access and merge the data into "base."
-```{r household_info, message=FALSE}
+```{r household_info, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 #Link the house hould data
 househould <- read_csv(here('raw_data','ss16hal.csv'))%>% 
   select(SERIALNO, #Serial Number to link House Hold and Personal data
@@ -127,7 +127,7 @@ str(base)
 
 ## 2.3 Convert the variable types
 Convert the categorical data into factor type and numetical data into numeric type. The factorial data in this dataframe will keep its representative code instead of the category name to save the memory space. 
-```{r converting_data, message=FALSE}
+```{r converting_data, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 #conver the catagorical variable type
 base <- base %>% mutate(HISP= as.factor(HISP),
                         RAC1P= as.factor(RAC1P),
@@ -153,7 +153,7 @@ base <- base %>% mutate(AGEP = as.numeric(AGEP),
 ```
 
 Replace the factor levels to the contents in the survery question for easy understanding.
-```{r, message=FALSE}
+```{r, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 levels(base$ACCESS) <- convertCSV2Factor("ACCESS")
 levels(base$HISP) <- convertCSV2Factor("HISP")
 levels(base$RAC1P) <- convertCSV2Factor("RAC1P")
@@ -171,7 +171,7 @@ levels(base$NATIVITY) <- convertCSV2Factor("NATIVITY")
 ==================
 
 
-# 4. Criteria for filtering the data
+# 3. Criteria for filtering the data
 
 __1. Age range: __
 
@@ -205,7 +205,7 @@ In this study we will consider everyone that had positive earnings in the last 1
 base <- base %>%  filter(WAGP > 0)
 ```
 
-__4. Annually Working Weeks: __
+__3. Annually Working Weeks: __
 
 The selection of full time employee is arbitrary. This study includes groups which __work more than 40 weeks a years (Data Filtering Criteria 4)__. (Please be noted: More studies shold be considered in decideing the threshold separating full-time and part-time employee. This study set the 40 week/year as the threshold for now.)
 
@@ -216,9 +216,9 @@ base <- base %>%
 
 ==================
 
-# 6. Building Models
+# 4. Building Models
 
-## 6.1 Examine access to the internet and its relation to earnings.
+## 4.1 Examine access to the internet and its relation to earnings.
 
 ```{r}
 base %>% select(ACCESS) %>% summary()
@@ -299,11 +299,11 @@ __Diagnostics of Model_04 Log Earnings__
 
 * Since the line is close to horizontal and based on our BP test we can see that we do not have a heteroscedasticity problem with this model.
 
-# 7. Updates for the week4 
+# 5. Updates for the week4 
 
 __The updates in the week4's report are: __
   
   1. Following the professor's comments from week3 and group's new thoughts to revise the criteria of __earnings__ - now it is bigger then $0.00
   
-  2. Build the models as in the section 6 above. 
+  2. Build the models as in the section 4 above. 
   
