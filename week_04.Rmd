@@ -2,7 +2,9 @@
 title: "The Impact of Technology Access on Earnigs"
 author: "Group 06"
 date: "January 28, 2019"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # 0. Research Question and Variable Selection
@@ -32,6 +34,7 @@ To answer the research questions, this study looks at the variables which will r
   10. RACBLK # Black or African American recode
   11. RACNH # Native Hawaiian recode
   12. RACWHT # White recode
+  13. SCHL # Educational attainment
   13. WAOB # World area of birth
   14. WKW #Weeks worked during past 12 months
   15. ACCESS # Access to the Internet
@@ -70,6 +73,11 @@ if(!require(DataExplorer)){
 }
 library(DataExplorer)
 
+if(!require(lmtest)){
+  install.packages("lmtest")
+}
+library(lmtest)
+
 source(here("code","function_convert_CSV_to_vector.R"))
 ```
 
@@ -94,6 +102,8 @@ base <- read_csv(here('raw_data','ss16pal.csv'))%>%
          RACBLK,  # Black or African American recode
          RACNH, # Native Hawaiian recode
          RACWHT,  # White recode
+         SCHL,   # Educational attainment
+         SEX,     # SEX
          WAOB,  # World area of birth
          WKW)   #Weeks worked during past 12 months
 ```
@@ -126,6 +136,8 @@ base <- base %>% mutate(HISP= as.factor(HISP),
                         RACBLK = as.factor(RACBLK),
                         RACNH = as.factor(RACNH),
                         RACWHT = as.factor(RACWHT),
+                        SCHL = as.factor(SCHL),
+                        SEX = as.factor(SEX),
                         WAOB = as.factor(WAOB),
                         WKW = as.factor(WKW),
                         ACCESS = as.factor(ACCESS),
@@ -150,122 +162,13 @@ levels(base$RACASN) <- convertCSV2Factor("RACASN")
 levels(base$RACBLK) <- convertCSV2Factor("RACBLK")
 levels(base$RACNH) <- convertCSV2Factor("RACNH")
 levels(base$RACWHT) <- convertCSV2Factor("RACWHT")
+levels(base$SCHL) <- convertCSV2Factor("SCHL")
+levels(base$SEX) <- convertCSV2Factor("SEX")
 levels(base$WKW) <- convertCSV2Factor("WKW")
 levels(base$WAOB) <- convertCSV2Factor("WAOB")
 levels(base$NATIVITY) <- convertCSV2Factor("NATIVITY")
 ```
 ==================
-
-# 3. EDA
-
-## 3.1 Brief of data structure
-All variables are in the right data type as expected. 
-```{r echo=FALSE}
-str(base)
-```
-
-## 3.2 Brief of data summary
-```{r echo=FALSE}
-summary(base)
-```
-
-## 3.3 Missing data
-The variable of "WKW", Weeks worked during past 12 months, has a great amount of missing data.The major missing data could be under the groupe of youth, which do not have income yet. This variable will be re-examed after filtering the age group. 
-```{r echo=FALSE}
-plot_missing(base)
-```
-
-## 3.4 Brief of "Age Dispersion"
-
-```{r eda_age}
-base %>% select(AGEP) %>%  summary()
-base %>% ggplot(aes(AGEP)) + geom_histogram(binwidth = 3, fill = "white", colour = "black") + xlab("Age") + ylab("Counts") + ggtitle("Age Dispersion") + theme(plot.title = element_text(hjust = 0.5))
-```
-
-## 3.5 Brief of "Wage"
-
-__- Summary of wages - Overall__
-```{r}
-summary(base$WAGP)
-```
-
-```{r warning=FALSE}
-base %>% ggplot(aes(WAGP)) + geom_histogram(binwidth = 10000, fill = "white", colour = "black") + xlab("Wage") + ylab("Counts") + ggtitle("Wage Dispersion") + theme(plot.title = element_text(hjust = 0.5))
-```
-
-```{r warning=FALSE}
-base  %>% ggplot(aes(x = WAGP)) + geom_density() + xlab("Wage") +ylab("Density") + ggtitle("Wage - Density") + theme(plot.title = element_text(hjust = 0.5))
-```
-
-__- Summary of wages - By races__
-```{r warning=FALSE}
-ggplot(data = base, aes(x = RAC1P, y = WAGP)) + geom_boxplot() + coord_flip() + xlab("") + ylab("Wage") + ggtitle("Wage by Races - Box Plot") + theme(plot.title = element_text(hjust = 0.5))
-```
-
-```{r warning=FALSE}
-ggplot(data = base, aes(x = WAGP, fill = RAC1P)) + geom_density(alpha = .2) + xlab("Wage") + ylab("Density") + ggtitle("Wage by Races - Density") + theme(plot.title = element_text(hjust = 0.5))
-```
-
-__Note:__ \n
-
-category in the graphs above | corresponding title in the survey
-----------------------------|----------------------------------
-Two more | Two or More Races
-Others | Some Other Race alone
-Hawaiian | Native Hawaiian and Other Pacific Islander alone
-Asian | Asian alone
-Tribes or Others | American Indian and Alaska Native tribes specified; or American Indian or Alaska Native, not specified and no other races
-American Indian | American Indian alone
-African American | Black or African American alone
-White | White alone
-
-## 3.6 Brief of "Access to Internet"
-
-__- Summary of access to internet__
-
-Most of people pay for the internet access. 
-```{r, echo=FALSE}
-summary(base$ACCESS)
-
-```
-```{r}
-ggplot(data = base, aes(x = ACCESS)) + geom_bar() + xlab("") + ylab("Sum of Access to Internet") + coord_flip() + ggtitle("Summary of Access to Internet") + theme(plot.title = element_text(hjust = 0.5))
-```
-
-__- Summary of access to internet by races__
-
-__Internet access by counts of each race group__
-
-When counting the absolute number of each category type of internet access, the race groups of "White" and "African American" count the most in all access type. The reason could be that the race groups of white and african american is the demographic majority in the overall population.
-```{r echo=FALSE}
-base2 <- base %>% 
-        select(c("RAC1P","ACCESS")) %>% 
-        group_by(RAC1P, ACCESS) %>% 
-        summarise(counts = n())
-```
-
-```{r}
-ggplot(data = base2, aes(x = ACCESS, y = counts, fill = RAC1P)) + geom_col(position = "dodge") + coord_flip() + xlab("") + ylab("Sum of Access to Internet")  + ggtitle("Summary of Access to Internet") + theme(plot.title = element_text(hjust = 0.5)) + labs(fill = "Race")
-```
-
-__Internet access by ratio in each race group__
-
-The diagram below reveals that, in term of proportion within each group, (1) no "Free Access" in the Hawaiian group. This group has the highest ratio of paied internet service; (2) Asian group does not like "Free Access" as well, and second in the category of paid access; (3) the group of "African American" and "Others" have a lower rate in paid access and a higher rate in NO access to internet, but this two group share the most resource of free internet access.    
-```{r echo=FALSE}
-base3 <- base %>% 
-        select(c("RAC1P")) %>% 
-        group_by(RAC1P) %>% 
-        summarise(counts = n()) 
-base4 <- merge(x = base2, y = base3, by = "RAC1P", all.x = TRUE)
-base4 <- base4 %>% 
-         mutate(rate = base4$counts.x/base4$counts.y)
-
-```
-
-```{r}
-ggplot(data = base4, aes(x = ACCESS, y = rate, fill = RAC1P)) + geom_col(position = "dodge") + coord_flip() + xlab("") + ylab("Sum of Access to Internet")  + ggtitle("Summary of Access to Internet") + theme(plot.title = element_text(hjust = 0.5)) + labs(fill = "Race")
-rm("base3","base4", "base2")
-```
 
 
 # 4. Criteria for filtering the data
@@ -286,10 +189,6 @@ base <- base %>%
 base$age_group <- as.factor(base$age_group)
 ```
 
-```{r}
-base %>% ggplot(aes(AGEP)) + geom_histogram(binwidth = 3, fill = "white", colour = "black") + xlab("Age") + ylab("Counts") + ggtitle("Age Dispersion\n This study focuses on the group in the age between 14 to 62") + theme(plot.title = element_text(hjust = 0.5)) + facet_grid(age_group ~ .)
-
-```
 
 Remove the records which are out of the age group of 14 to 62.  
 
@@ -298,26 +197,14 @@ base <- base %>%  filter(AGEP>=14 & AGEP <= 62)
 base$age_group <- NULL
 ```
 
-__2. Wage: __
+__2. Earnings: __
 
-This study excludes the out-liers of super rich and upper level, which do not contribute to the discussion of premium from access to internet. Considering the hourly wage in US was $7.25 back to 2014 and this study considering people working more than 40 weeks as the full time employees, this minimum income for full-time emloyees would be 7.25 USD/Hour * 40 Weeks * 40 Hours/Week = 11600 USD. __Yearly wage from 11,600 up to the third quartile(54,000) will be included in this study (Data Filtering Criteria 2)__. The miss data and rests will be removed.   
-
-```{r}
-base <- base %>%  filter(WAGP<54000 & WAGP > 11600)
-```
-
-__3. Tolerance for missing data: __
-
-The tolerance for missing date varies by research topic. The tolerance for missing data in this study is arbitrarily set at 50% - __the missing records in a variable should not be more than half of the total observations (Data Filtering Criteria 3)__.   
-
-  - re-exam missing data after filtering data based on the __Criteria 1__ and __Criteria 2__.
+In this study we will consider everyone that had positive earnings in the last 12 months.   
 
 ```{r}
-plot_missing(base)
+base <- base %>%  filter(WAGP > 0)
 ```
-  
-  - Based on the graph above, all variables follow the Creditera 3. 
-  
+
 __4. Annually Working Weeks: __
 
 The selection of full time employee is arbitrary. This study includes groups which __work more than 40 weeks a years (Data Filtering Criteria 4)__. (Please be noted: More studies shold be considered in decideing the threshold separating full-time and part-time employee. This study set the 40 week/year as the threshold for now.)
@@ -325,12 +212,6 @@ The selection of full time employee is arbitrary. This study includes groups whi
 ```{r}
 base <- base %>% 
          filter(WKW %in% c("50 to 52 weeks worked during past 12 months", "48 to 49 weeks worked during past 12 months", "40 to 47 weeks worked during past 12 months"))
-```
-
-
-# 5. Data summary - After the restriction
-```{r echo=FALSE}
-summary(base)
 ```
 
 ==================
@@ -358,30 +239,15 @@ base %>%
   summarise (mean(WAGP),sd(WAGP),min(WAGP),max(WAGP), median(WAGP))
 ```
 
-## 6.2 Race and access to the internet
-
-```{r}
-base %>% select(RAC1P) %>% summary()
-base %>% filter(ACCESS=="No Access") %>% select(RAC1P) %>% summary() #person doesn't have ACCESS to Internet
-
-base %>%  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
-  ggplot() + geom_bar(aes(x = RAC1P, fill=ACCESS)) + 
-  coord_flip() + 
-  xlab('Race') +
-  scale_x_discrete(labels = c('White', 'Black', 'Native American', "Multiple tribes", "Asian", 'Pacific Islander', 'Other', 'Two or more Races')) +
-  theme(legend.position= c(0.87,0.85))
-
-```
-
 __Building the model__
 ```{r}
 base_model <- base %>%  
   filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
   mutate(free_access = ACCESS == "Free Access",
          hispanic = HISP != "Not Spanish/Hispanic/Latino",
-         black = RACBLK == "Yes"
+         black = RACBLK == "Yes",
+         female = SEX =="Female"
          ) 
-  
 model_01 <- lm(WAGP ~ free_access, data = base_model)
 
 model_01 %>% summary()
@@ -390,14 +256,33 @@ model_02 <- lm(WAGP ~ free_access + hispanic + black, data = base_model)
 model_02 %>% summary()
 ```
 
-# 7. Updates for the week3 
+__Building the model with a log function__
+```{r}
+base_model <- base_model %>% mutate(ln_earnings = log(WAGP))
 
-__The updates in the week3's report are: __
+model_03 <- lm(ln_earnings ~ free_access, data = base_model)
 
-  1. Reframe the structure of the report. The main structure of the report is (1) Research Qestion and Variable -> (2) Data Cleaning -> (3) EDA -> (4) criterion and data filtering -> (5) Model.
+model_03 %>% summary()
+
+model_04 <- lm(ln_earnings ~ free_access + hispanic + black + female + AGEP + I(AGEP^2),
+               data = base_model)
+model_04 %>% summary()
+
+#Conduct BPG Test
+bptest(model_01)
+bptest(model_02)
+bptest(model_03)
+bptest(model_04)
+
+```
+
+
+
+# 7. Updates for the week4 
+
+__The updates in the week4's report are: __
   
-  2. Impove the EDA and data cleaning, debug code. 
+  1. Following the professor's comments from week3 and group's new thoughts to revise the criteria of __earnings__ - now it is bigger then $0.00
   
-  3. Following the professor's comments from week2 and group's new thoughts to revise the criteria of __working weeksage__ - now it is 40 weeks and above; __age__ - now it is 14-62; and __wage__ - now it is $11600 - $54000
+  2. Build the models as in the section 6 above. 
   
-  4. Build the models as in the section 6 above. (From the model 1 above, no conclusion can be drawn from the model 1 that the free internet access relates to the wage - the p-value is 0.132. In the model 2 above, the race factor, such as "hispanic" or "black", relates to the wage at significant level 0, the Multiple R-squared value of this model is only at 2.53%.) - Since no meaningful conclusion can be drawn from the two models above, the team halt at this moment, and will ask for help from professor review the model/solution in the next class. 
