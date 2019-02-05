@@ -255,6 +255,11 @@ model_01 %>% summary()
 model_02 <- lm(WAGP ~ free_access + hispanic + black, data = base_model)
 model_02 %>% summary()
 ```
+```{r}
+#Conduct BPG Test & Plot Model_04 for Diagnostics
+bptest(model_01)
+bptest(model_02)
+```
 
 __Building the model with a log function__
 ```{r}
@@ -264,19 +269,35 @@ model_03 <- lm(ln_earnings ~ free_access, data = base_model)
 
 model_03 %>% summary()
 
+bptest(model_03)
+
 model_04 <- lm(ln_earnings ~ free_access + hispanic + black + female + AGEP + I(AGEP^2),
                data = base_model)
 model_04 %>% summary()
 
-#Conduct BPG Test
-bptest(model_01)
-bptest(model_02)
-bptest(model_03)
+#Conduct BPG Test & Plot Model_04 for Diagnostics
 bptest(model_04)
-
+par(mfrow = c(2, 2))
+plot(model_04)
 ```
 
+__Diagnostics of Model_04 Log Earnings__  
 
+**Breusch_Pagan Test**  
+
+* Since the p-value is > 0.05 we fail to reject the null hypothesis of homoskedasticity.  
+
+**Residuals vs Fitted Plot.**  
+
+* The line is horizonal and there is no distinct patterns, indicating a linear relationship.
+
+**Normal Q-Q**  
+
+* The residuals seem to somewhat follow the dashed line, therefore it appears that the residuals are normally distributed.  
+
+**Scale-Location**  
+
+* Since the line is close to horizontal and based on our BP test we can see that we do not have a heteroscedasticity problem with this model.
 
 # 7. Updates for the week4 
 
