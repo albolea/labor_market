@@ -28,7 +28,7 @@ source(here("code","function_convert_CSV_to_vector.R"))
 #load the persional data to variable Base
 #load the persional data to variable Base
 base <- read_csv(here('raw_data','ss16pal.csv'))%>% 
-  select(SERIALNO, #Serial Number to link House Hold and Personal data
+  dplyr::select(SERIALNO, #Serial Number to link House Hold and Personal data
          AGEP,  # Age: 0#99
          SEMP,  # Self-employment income past 12 months (signed)
          WAGP,  # Wages or salary income past 12 months
@@ -50,10 +50,10 @@ base <- read_csv(here('raw_data','ss16pal.csv'))%>%
 #Link the house hould data
 #Link the house hould data
 househould <- read_csv(here('raw_data','ss16hal.csv'))%>% 
-  select(SERIALNO, #Serial Number to link House Hold and Personal data
+  dplyr::select(SERIALNO, #Serial Number to link House Hold and Personal data
          ACCESS # Access to the Internet
   )
-base <- base %>% left_join(househould) %>% select(-SERIALNO)
+base <- base %>% left_join(househould) %>% dplyr::select(-SERIALNO)
 rm(househould)
 
 #conver the catagorical variable type
@@ -115,7 +115,14 @@ base_model <- base %>%
   mutate(free_access = ACCESS == "Free Access",
          hispanic = HISP != "Not Spanish/Hispanic/Latino",
          black = RACBLK == "Yes",
-         female = SEX =="Female"
+         female = SEX =="Female",
+         low_education = as.integer(SCHL) <= 7,
+         some_education = as.integer(SCHL) > 7 & as.integer(SCHL) <= 14,
+         high_school = as.integer(SCHL) > 14 & as.integer(SCHL) <= 16,
+         undergrad_or_higher = as.integer(SCHL) > 16,
+         age = AGEP,
+         age_square = AGEP^2
+         
   ) 
 model_01 <- lm(WAGP ~ free_access, data = base_model)
 
@@ -140,3 +147,11 @@ bptest(model_01)
 bptest(model_02)
 bptest(model_03)
 bptest(model_04)
+
+explanatory = c("free_access","hispanic","black", "female" ,"age" , "age_square",
+                "some_education" , "high_school" , "undergrad_or_higher")
+dependent = "ln_earnings" 
+base_model %>%
+  summary_factorlist(dependent, explanatory, p=TRUE, add_dependent_label=TRUE)
+
+summary(base_model)
