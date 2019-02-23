@@ -252,6 +252,7 @@ base_model <- base %>%
          hispanic = HISP != "Not Spanish/Hispanic/Latino",
          black = RACBLK == "Yes",
          female = SEX =="Female",
+         white = hispanic == FALSE & black == FALSE,
          low_education = as.integer(SCHL) <= 7,
          some_education = as.integer(SCHL) > 7 & as.integer(SCHL) <= 14,
          high_school = as.integer(SCHL) > 14 & as.integer(SCHL) <= 16,
@@ -299,6 +300,19 @@ model_06 <- lm(ln_earnings ~ hispanic + black + female + AGEP + I(AGEP^2) +
 
 model_06 %>% summary()
 
+
+model_white<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
+                 some_education + high_school + undergrad_or_higher, 
+               data = filter(base_model,white == TRUE))
+
+model_black<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
+                 some_education + high_school + undergrad_or_higher, 
+               data = filter(base_model,black == TRUE))
+
+model_hispanic<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
+                 some_education + high_school + undergrad_or_higher, 
+               data = filter(base_model,hispanic == TRUE))
+
 #Conduct BPG Test & Plot Model_04 for Diagnostics
 bptest(model_04)
 par(mfrow = c(2, 2))
@@ -329,6 +343,19 @@ __Trying new package__
 export_summs(model_01,model_02)
 export_summs(model_03,model_04)
 export_summs(model_05,model_06)
+
+export_summs(model_white,
+             model_black, 
+             model_hispanic, 
+             model.names = c("White","black","hispanic"),
+             coefs =c("Have free access" = "free_accessTRUE", 
+                      "Woman" = "femaleTRUE",
+                      "Age" = "AGEP",
+                      "Age Square" = "I(AGEP^2)",
+                      "Low Education" = "some_educationTRUE",
+                      "High School" = "high_schoolTRUE",
+                      "Undergrad or higher" = "undergrad_or_higherTRUE")
+             )
 ```
 
 
