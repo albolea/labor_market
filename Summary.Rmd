@@ -155,7 +155,9 @@ base_no <- base %>%
   filter(ACCESS == "No Access") %>%
   select(AGEP, WAGP)
 
-stargazer(as.data.frame(base_access), title = "Free Access", header = FALSE, summary = TRUE)
+stargazer(as.data.frame(base_access), title = "Free Access", 
+          covariate.labels=c("Age (years)","Earnings (dollars)"),
+          header = FALSE, summary = TRUE)
 ```
 &nbsp;
 &nbsp;
@@ -164,7 +166,9 @@ __Table of Descriptive Statistics for No Internet Access__
 
 
 ```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE }
-stargazer(as.data.frame(base_no), title = "No Access", header = FALSE, summary = TRUE)
+stargazer(as.data.frame(base_no), 
+          covariate.labels=c("Age (years)","Earnings (dollars)"),
+          title = "No Access", header = FALSE, summary = TRUE)
 ```
 
 ```{r, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
@@ -208,6 +212,7 @@ stargazer(model_04, title="Results",
                                "Some College", "Undergraduate Degree or Higher"),
           header = FALSE)
 
+
 ```
 
 ```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE}
@@ -218,9 +223,9 @@ stargazer(model_white, model_black, model_hispanic,
                                "Undergraduate Degree or Higher"),
           column.labels = c("White", "Black", "Hispanic"),
           header = FALSE)
+
+
 ```
-
-
 
 
 
