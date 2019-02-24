@@ -1,0 +1,227 @@
+---
+title: "Labor Market Analysis"
+author: "Mark Russeff, Renato Albolea, Shuai Ma"
+subtitle: Summary Findings
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+---
+&nbsp;
+&nbsp;
+
+
+__Research Questions:__ 
+
+With a past of racial inequality in the southern states it would be interesting to examine how race/ethnicity is related to access to the internet and other technologies and how not having or having access could effect a persons earnings. This can be explored via the following research questions:
+
+  1. In the state of Alabama, how to earnings vary by access to the internet/technology?
+  2. Does the internet/technology premium vary by race and ethnicity?  
+  
+&nbsp;
+&nbsp;
+
+```{r setup, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+# Clear environment
+rm(list = ls(all = TRUE))
+
+# check if package is installed, if not installed then load
+if(!require(here)){
+  install.packages("here")
+}
+library(here)
+
+if(!require(tidyverse)){
+  install.packages("tidyverse")
+}
+library(tidyverse)
+
+if(!require(DataExplorer)){
+  install.packages("DataExplorer")
+}
+library(DataExplorer)
+
+if(!require(lmtest)){
+  install.packages("lmtest")
+}
+library(lmtest)
+
+if(!require(stargazer)){
+  install.packages("stargazer")
+}
+library(stargazer)
+library(kableExtra)
+
+
+source(here("code","function_convert_CSV_to_vector.R"))
+```
+```{r import_data, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+#load the persional data to variable Base
+base <- read_csv(here('raw_data','ss16pal.csv'))%>% 
+ dplyr::select(SERIALNO, #Serial Number to link House Hold and Personal data
+         AGEP,  # Age: 0#99
+         SEMP,  # Self-employment income past 12 months (signed)
+         WAGP,  # Wages or salary income past 12 months
+         HISP,  # Recoded detailed Hispanic origin
+         NATIVITY,  # Nativity
+         PERNP, # Total person's earnings
+         RAC1P, # Recoded detailed race code
+         RACAIAN, # American Indian and Alaska Native recode
+         RACASN,  # Asian recode
+         RACBLK,  # Black or African American recode
+         RACNH, # Native Hawaiian recode
+         RACWHT,  # White recode
+         SCHL,   # Educational attainment
+         SEX,     # SEX
+         WAOB,  # World area of birth
+         WKW)   #Weeks worked during past 12 months
+```
+```{r household_info, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+#Link the house hould data
+househould <- read_csv(here('raw_data','ss16hal.csv'))%>% 
+  dplyr::select(SERIALNO, #Serial Number to link House Hold and Personal data
+        ACCESS # Access to the Internet
+  )
+base <- base %>% left_join(househould) %>% dplyr::select(-SERIALNO)
+rm(househould)
+```
+```{r converting_data, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+#conver the catagorical variable type
+base <- base %>% mutate(HISP= as.factor(HISP),
+                        RAC1P= as.factor(RAC1P),
+                        RACAIAN = as.factor(RACAIAN),
+                        RACASN = as.factor(RACASN),
+                        RACBLK = as.factor(RACBLK),
+                        RACNH = as.factor(RACNH),
+                        RACWHT = as.factor(RACWHT),
+                        SCHL = as.factor(SCHL),
+                        SEX = as.factor(SEX),
+                        WAOB = as.factor(WAOB),
+                        WKW = as.factor(WKW),
+                        ACCESS = as.factor(ACCESS),
+                        NATIVITY = as.factor(NATIVITY)
+                        )
+
+#conver the numeric variable type
+base <- base %>% mutate(AGEP = as.numeric(AGEP),
+                        SEMP= as.numeric(SEMP),
+                        WAGP= as.numeric(WAGP),
+                        PERNP= as.numeric(PERNP)
+                        )
+levels(base$ACCESS) <- convertCSV2Factor("ACCESS")
+levels(base$HISP) <- convertCSV2Factor("HISP")
+levels(base$RAC1P) <- convertCSV2Factor("RAC1P")
+levels(base$RACAIAN) <- convertCSV2Factor("RACAIAN")
+levels(base$RACASN) <- convertCSV2Factor("RACASN")
+levels(base$RACBLK) <- convertCSV2Factor("RACBLK")
+levels(base$RACNH) <- convertCSV2Factor("RACNH")
+levels(base$RACWHT) <- convertCSV2Factor("RACWHT")
+levels(base$SCHL) <- convertCSV2Factor("SCHL")
+levels(base$SEX) <- convertCSV2Factor("SEX")
+levels(base$WKW) <- convertCSV2Factor("WKW")
+levels(base$WAOB) <- convertCSV2Factor("WAOB")
+levels(base$NATIVITY) <- convertCSV2Factor("NATIVITY")
+```
+```{r, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+base <- base %>% 
+        mutate( age_group = case_when(
+                            AGEP < 14 ~ "Other ages (exclude)",
+                            AGEP >= 14 & AGEP <= 62 ~ "Age 14-62 (include)",
+                            AGEP > 62 ~ "Other ages (exclude)"
+        ))
+base$age_group <- as.factor(base$age_group)
+
+base <- base %>%  filter(AGEP>=14 & AGEP <= 62)
+base$age_group <- NULL
+
+base <- base %>%  filter(WAGP > 0)
+
+base <- base %>% 
+         filter(WKW %in% c("50 to 52 weeks worked during past 12 months", "48 to 49 weeks worked during past 12 months", "40 to 47 weeks worked during past 12 months"))
+```
+&nbsp;
+&nbsp;
+
+__Table of Descriptive Statistics for Free Internet Access__
+
+
+```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE }
+
+base_access <- base %>%
+  filter(ACCESS == "Free Access") %>%
+  select(AGEP, WAGP)
+base_no <- base %>%
+  filter(ACCESS == "No Access") %>%
+  select(AGEP, WAGP)
+
+stargazer(as.data.frame(base_access), title = "Free Access", header = FALSE, summary = TRUE)
+```
+&nbsp;
+&nbsp;
+
+__Table of Descriptive Statistics for No Internet Access__
+
+
+```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE }
+stargazer(as.data.frame(base_no), title = "No Access", header = FALSE, summary = TRUE)
+```
+
+```{r, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+base_model <- base %>%  
+  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
+  mutate(free_access = ACCESS == "Free Access",
+         hispanic = HISP != "Not Spanish/Hispanic/Latino",
+         black = RACBLK == "Yes",
+         female = SEX =="Female",
+         white = hispanic == FALSE & black == FALSE,
+         low_education = as.integer(SCHL) <= 14,
+         high_school_GED = as.integer(SCHL) > 15 & as.integer(SCHL) <= 17,
+         some_college = as.integer(SCHL) > 17 & as.integer(SCHL) <= 20,
+         undergrad_or_higher = as.integer(SCHL) > 20,
+         age = AGEP,
+         age_square = AGEP^2
+         ) 
+
+base_model <- base_model %>% mutate(ln_earnings = log(WAGP))
+
+model_04 <- lm(ln_earnings ~ free_access + hispanic + black + female + AGEP + I(AGEP^2) +
+                 high_school_GED + some_college + undergrad_or_higher, data = base_model)
+
+model_white<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
+                 high_school_GED + some_college + undergrad_or_higher, 
+               data = filter(base_model,white == TRUE))
+
+model_black<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
+                 high_school_GED + some_college + undergrad_or_higher, 
+               data = filter(base_model,black == TRUE))
+
+model_hispanic<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
+                 high_school_GED + some_college + undergrad_or_higher, 
+               data = filter(base_model,hispanic == TRUE))
+```
+
+```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE}
+stargazer(model_04, title="Results", 
+          covariate.labels = c("Free Access", "Hispanic", "Black",
+                               "Female", "Age (Years)", "Age Squared", "High School Diploma or GED",
+                               "Some College", "Undergraduate Degree or Higher"),
+          header = FALSE)
+
+```
+
+```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE}
+stargazer(model_white, model_black, model_hispanic, 
+          title="Results", 
+          covariate.labels = c("Free Access", "Female", "Age (Years)", "Age Squared", 
+                               "High School Diploma or GED", "Some College", 
+                               "Undergraduate Degree or Higher"),
+          column.labels = c("White", "Black", "Hispanic"),
+          header = FALSE)
+```
+
+
+
+
+
+
