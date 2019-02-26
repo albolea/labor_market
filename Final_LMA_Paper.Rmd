@@ -1,0 +1,250 @@
+---
+title: "Examining the Effects of Internet Access on Earnings:"
+author: "Mark Russeff, Renato Albolea, Shuai Ma"
+subtitle: Can access to the internet help close the racial income gap?
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+---
+&nbsp;
+&nbsp;
+\linespread{1.5}
+
+__Introduction__ 
+
+In today’s society, reliable access to the internet has become something that we all take for granted; an integral part of our daily lives. We are constantly connected via phone, laptop or tablet to a vast world of information that is always just a click away. The internet helps us live more efficient, well informed and interconnected lives. Something that was once considered a luxury a few decades ago is increasingly becoming an essential component of our everyday existence. Unfortunately, for some this life changing technology is still out of reach. According to a 2018 Federal Communications Commission’s (FCC) report nearly 19 million Americans, or 6% of the population, still lack access to high speed internet. Many argue that this lack of access places these already vulnerable groups at a sizable social and economic disadvantage. In response, policy makers worldwide have begun to recognize unrestricted internet access as a modern human right and have moved to provide free access to all of their citizens. While these policies are rooted in social justice, free speech and equality, the economic component is also very important. Closing the “information gap” and bridging the chasm between those who are exploiting the vast potential of technology and those who are not should lead to increased economic opportunity for all. On the other hand, free and unrestricted access to the internet may not have any effect on one’s earnings and resources may be more effectively allocated to other programs.  The purpose of this paper is to examine whether the policies providing free internet access can have a positive economic effect on a person’s earnings, specifically for already disadvantaged minority groups. First, we will ask: does access to the internet have any effect on a person’s earnings? Then, does that premium or penalty vary by race?
+
+As more policy makers begin to embrace the idea of free unrestricted internet access as a modern human right, it is becoming increasingly important that they understand the effects of such policies both socially and economically. If providing free access to the internet can increase an individual’s earnings and in turn raise their economic wellbeing then such policies should engender broad support. However, more importantly, if they can also have a positive impact on racial groups historically disadvantaged by systemic racism and economic oppression then they could be a significant tool in the efforts to close the racial income gap. So as policy makers earmark funds for more jobs programs, retraining initiatives, and other strategies to combat income inequality it is important that they are aware of all possible factors effecting the earnings of their citizens. Current programs like the FCC’s Lifeline Program which subsidizes broadband services for the poor are woefully underfunded and offer a mere $9.25 per month for internet service, if studies can show a substantial economic benefit from investing in such programs then perhaps they will expand and be more effective moving forward. 
+
+In order to address our research questions in the context of these policy challenges we will be estimating four different earnings models. All of the models will be estimated by preforming a multiple regression analysis using ordinary least squares (OLS) estimators. The first model will be addressing whether or not access to the internet effects earnings for our whole sample. While the other three models will be modeled on stratified data using the categorical covariate race in order to identify interactions between our categorical covariate and the other variables, particularly access to the internet. Then by interpreting our results we hope to garner some evidence of a relationship between access to the internet and earnings so that we can offer a clearer perspective on public policy and the right to internet access. 
+
+
+```{r setup, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+# Clear environment
+rm(list = ls(all = TRUE))
+
+# check if package is installed, if not installed then load
+if(!require(here)){
+  install.packages("here")
+}
+library(here)
+
+if(!require(tidyverse)){
+  install.packages("tidyverse")
+}
+library(tidyverse)
+
+if(!require(DataExplorer)){
+  install.packages("DataExplorer")
+}
+library(DataExplorer)
+
+if(!require(lmtest)){
+  install.packages("lmtest")
+}
+library(lmtest)
+
+if(!require(stargazer)){
+  install.packages("stargazer")
+}
+library(stargazer)
+library(kableExtra)
+
+
+source(here("code","function_convert_CSV_to_vector.R"))
+```
+```{r import_data, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+#load the persional data to variable Base
+base <- read_csv(here('raw_data','ss16pal.csv'))%>% 
+ dplyr::select(SERIALNO, #Serial Number to link House Hold and Personal data
+         AGEP,  # Age: 0#99
+         SEMP,  # Self-employment income past 12 months (signed)
+         WAGP,  # Wages or salary income past 12 months
+         HISP,  # Recoded detailed Hispanic origin
+         NATIVITY,  # Nativity
+         PERNP, # Total person's earnings
+         RAC1P, # Recoded detailed race code
+         RACAIAN, # American Indian and Alaska Native recode
+         RACASN,  # Asian recode
+         RACBLK,  # Black or African American recode
+         RACNH, # Native Hawaiian recode
+         RACWHT,  # White recode
+         SCHL,   # Educational attainment
+         SEX,     # SEX
+         WAOB,  # World area of birth
+         WKW)   #Weeks worked during past 12 months
+```
+```{r household_info, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+#Link the house hould data
+househould <- read_csv(here('raw_data','ss16hal.csv'))%>% 
+  dplyr::select(SERIALNO, #Serial Number to link House Hold and Personal data
+        ACCESS # Access to the Internet
+  )
+base <- base %>% left_join(househould) %>% dplyr::select(-SERIALNO)
+rm(househould)
+```
+```{r converting_data, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+#conver the catagorical variable type
+base <- base %>% mutate(HISP= as.factor(HISP),
+                        RAC1P= as.factor(RAC1P),
+                        RACAIAN = as.factor(RACAIAN),
+                        RACASN = as.factor(RACASN),
+                        RACBLK = as.factor(RACBLK),
+                        RACNH = as.factor(RACNH),
+                        RACWHT = as.factor(RACWHT),
+                        SCHL = as.factor(SCHL),
+                        SEX = as.factor(SEX),
+                        WAOB = as.factor(WAOB),
+                        WKW = as.factor(WKW),
+                        ACCESS = as.factor(ACCESS),
+                        NATIVITY = as.factor(NATIVITY)
+                        )
+
+#conver the numeric variable type
+base <- base %>% mutate(AGEP = as.numeric(AGEP),
+                        SEMP= as.numeric(SEMP),
+                        WAGP= as.numeric(WAGP),
+                        PERNP= as.numeric(PERNP)
+                        )
+levels(base$ACCESS) <- convertCSV2Factor("ACCESS")
+levels(base$HISP) <- convertCSV2Factor("HISP")
+levels(base$RAC1P) <- convertCSV2Factor("RAC1P")
+levels(base$RACAIAN) <- convertCSV2Factor("RACAIAN")
+levels(base$RACASN) <- convertCSV2Factor("RACASN")
+levels(base$RACBLK) <- convertCSV2Factor("RACBLK")
+levels(base$RACNH) <- convertCSV2Factor("RACNH")
+levels(base$RACWHT) <- convertCSV2Factor("RACWHT")
+levels(base$SCHL) <- convertCSV2Factor("SCHL")
+levels(base$SEX) <- convertCSV2Factor("SEX")
+levels(base$WKW) <- convertCSV2Factor("WKW")
+levels(base$WAOB) <- convertCSV2Factor("WAOB")
+levels(base$NATIVITY) <- convertCSV2Factor("NATIVITY")
+```
+```{r, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+base <- base %>% 
+        mutate( age_group = case_when(
+                            AGEP < 14 ~ "Other ages (exclude)",
+                            AGEP >= 14 & AGEP <= 62 ~ "Age 14-62 (include)",
+                            AGEP > 62 ~ "Other ages (exclude)"
+        ))
+base$age_group <- as.factor(base$age_group)
+
+base <- base %>%  filter(AGEP>=14 & AGEP <= 62)
+base$age_group <- NULL
+
+base <- base %>%  filter(WAGP > 0)
+
+base <- base %>% 
+         filter(WKW %in% c("50 to 52 weeks worked during past 12 months", "48 to 49 weeks worked during past 12 months", "40 to 47 weeks worked during past 12 months"))
+```
+\newpage
+
+__Data__
+
+We are using data from the 2016 American Community Survey (ACS) to examine if access to the internet has an effect on earnings and if that effect varies across race using data from the state of Alabama. The 2016 ACS Alabama data sets provided by the United States Census Bureau contained both individual and household level data which we joined to create one data set containing a representative sample of 47,659 individual level observations across 17 variables relating to various demographic characteristics like age, race, sex and educational attainment. Access to the internet was assessed via the ACCESS variable contained within the household level data, which was then aggregated to the individual level in order to determine each individual’s access level.  In order to better address the effect access to the internet has on earnings we removed respondents who reported that they had “paid for access”. This limited our data to individuals who either received free internet or had no access at all. The implication for our analysis is that this provides a more contextual result for policy makers who could be evaluating the possible economic benefits of providing free internet to those with no access. Since we are measuring the effect of access on earnings we chose to use yearly earnings for full-time workers so any individuals with earnings of 0 or less were removed from the sample. In addition, we also chose to limit our sample to people of working age, so individuals between 14 – 62 years old. Lastly, due to small sample sizes in other race categories our sample selection was limited to White, Black and Hispanic individuals. This is a limitation of the Alabama ACS data; future analysis may require the use of a representative national sample with more observations.
+
+Table 1 and 2 display the descriptive statistics for the continuous variables in our data set. Table 1 displays the 372 observations with free access and Table 2 for the 1268 observations with no access. Immediately we can observe that the average earnings for an individual with free access is about 23.5% more than for someone with no access at US$40,218.28 and US$32,564.90 respectively. Both tables have the same max earnings at US$356,000 which is likely the earnings cap of the data but min earnings for no access is only US$100 compared to US$1,600 for free access. While the range may be large for both tables the interquartile range is far more compact. It is interesting to note as well that the average age for both free access and no access is quite close, within two years, this goes against the intuition that older people may be indifferent to whether or not they have access to the internet.
+
+__Table of Descriptive Statistics for Free Access__
+
+```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE }
+
+base_access <- base %>%
+  filter(ACCESS == "Free Access") %>%
+  select(AGEP, WAGP)
+base_no <- base %>%
+  filter(ACCESS == "No Access") %>%
+  select(AGEP, WAGP)
+
+stargazer(as.data.frame(base_access), title = "Free Access", 
+	          covariate.labels=c("Age (years)","Earnings (dollars)"),
+	          header = FALSE, summary = TRUE, digits = 2)
+```
+
+__Table of Descriptive Statistics for No Internet Access__
+
+
+```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE }
+stargazer(as.data.frame(base_no), 
+	          covariate.labels=c("Age (years)","Earnings (dollars)"),
+	          title = "No Access", header = FALSE, summary = TRUE, digits = 2)
+```
+&nbsp;
+
+__Modeling Approach__
+
+For our analysis we have chosen to perform a series of multiple regression analyses using OLS estimators. For this analysis we will use a logarithmic transformation of the dependent variable, earnings. Even though there was no evidence of heteroscedasticity we chose to use log(earnings) because conceptually percentage changes across our independent variables makes more sense. Next, we address variable selection. In our first model the variable of most interest is included as the dummy variable Free Access. Categorical variables are included for race as Black and Hispanic with White as the reference category, this was chosen so that the coefficients of the other races can be interpreted in respect to Whites. The other set of categorical variables represent educational attainment; High School Diploma or GED, Some College, Undergraduate Degree or Higher with no High School Diploma as the reference category. These variables were selected in order to avoid omitted variable bias because educational attainment and earnings are positively correlated but not jointly determined. The dummy variable Female was included to account for gender. Lastly the variables for age and age^2 were included, age^2 was included to account for the no linearity of the relationship between earnings and age. This constructed a model of the form:
+
+
+
+```{r, echo=TRUE, include=FALSE, message=FALSE, error=FALSE, warning=FALSE}
+base_model <- base %>%  
+  filter(!is.na(ACCESS) & ACCESS != "Paid Access") %>%
+  mutate(free_access = ACCESS == "Free Access",
+         hispanic = HISP != "Not Spanish/Hispanic/Latino",
+         black = RACBLK == "Yes",
+         female = SEX =="Female",
+         white = hispanic == FALSE & black == FALSE,
+         low_education = as.integer(SCHL) <= 14,
+         high_school_GED = as.integer(SCHL) > 15 & as.integer(SCHL) <= 17,
+         some_college = as.integer(SCHL) > 17 & as.integer(SCHL) <= 20,
+         undergrad_or_higher = as.integer(SCHL) > 20,
+         age = AGEP,
+         age_square = AGEP^2
+         ) 
+
+base_model <- base_model %>% mutate(ln_earnings = log(WAGP))
+
+model_04 <- lm(ln_earnings ~ free_access + hispanic + black + female + AGEP + I(AGEP^2) +
+                 high_school_GED + some_college + undergrad_or_higher, data = base_model)
+
+model_white<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
+                 high_school_GED + some_college + undergrad_or_higher, 
+               data = filter(base_model,white == TRUE))
+
+model_black<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
+                 high_school_GED + some_college + undergrad_or_higher, 
+               data = filter(base_model,black == TRUE))
+
+model_hispanic<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
+                 high_school_GED + some_college + undergrad_or_higher, 
+               data = filter(base_model,hispanic == TRUE))
+```
+&nbsp;
+
+
+__Empirical Results__
+
+Table 3 presents the estimate for our log earnings equation for our whole sample. Our estimates suggest that earnings are positively associated with educational attainment and age, both of which is what we would expect. Earnings are also negatively associated with being female or black. Controlling for all other variables our estimate suggests that a black person will make 13.15% less than a white person on average. This is both a statistically significant finding at the 1% level and is economically significant because it illustrates the problem of racial inequality in earnings. If we look at the free access coefficient we can see that controlling for all other variables free internet access leads to a 10.5% premium in earnings on average over having no access. This result is statistically significant at the 5% level and is also highly economically significant. We can say with some confidence that based on our estimated log earnings equation, earnings are positively associated with having free access to the internet. This is an important finding for our research and leads us into the second part of our analysis.
+
+&nbsp;
+
+```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE}
+stargazer(model_04, title="Results", 
+          covariate.labels = c("Free Access", "Hispanic", "Black",
+                               "Female", "Age (Years)", "Age Squared", "High School Diploma or GED",
+                               "Some College", "Undergraduate Degree or Higher"),
+          header = FALSE)
+
+```
+&nbsp;
+
+Table 4 presents the three estimated log earnings equations on the tratified data, each model representing a different race. When we examine the Free Access coefficient we can see that for Black people controlling for all other variable there is a 19% earnings premium for free access on average over having no access at all. This result is statistically significant at the 5% level and is extremely economically significant, more than making up for the 13.15% penalty in earnings for being black compared to being white. These estimates suggest a possible avenue to closing the racial earnings gap. For white people controlling for all other variables there is only a 5.65% premium on average for having free access. This is not a statistically significant estimate nor is it particularly economically significant. 
+
+&nbsp;
+
+```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE}
+stargazer(model_white, model_black, model_hispanic, 
+          title="Results", 
+          covariate.labels = c("Free Access", "Female", "Age (Years)", "Age Squared", 
+                               "High School Diploma or GED", "Some College", 
+                               "Undergraduate Degree or Higher"),
+          column.labels = c("White", "Black", "Hispanic"),
+          header = FALSE)
+```
+&nbsp;
+
+__Conclusion__
+

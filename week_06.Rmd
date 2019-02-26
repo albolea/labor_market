@@ -384,7 +384,11 @@ export_summs(model_white,
                       "Some College" = "some_collegeTRUE",
                       "Undergrad or higher" = "undergrad_or_higherTRUE")
              )
+
+table(bptest(model_white))
 ```
+
+
 
 
 # 5. Updates for the week5
