@@ -175,7 +175,22 @@ stargazer(as.data.frame(base_no),
 
 __Modeling Approach__
 
-For our analysis we have chosen to perform a series of multiple regression analyses using OLS estimators. For this analysis we will use a logarithmic transformation of the dependent variable, earnings. Even though there was no evidence of heteroscedasticity we chose to use log(earnings) because conceptually percentage changes across our independent variables makes more sense. Next, we address variable selection. In our first model the variable of most interest is included as the dummy variable Free Access. Categorical variables are included for race as Black and Hispanic with White as the reference category, this was chosen so that the coefficients of the other races can be interpreted in respect to Whites. The other set of categorical variables represent educational attainment; High School Diploma or GED, Some College, Undergraduate Degree or Higher with no High School Diploma as the reference category. These variables were selected in order to avoid omitted variable bias because educational attainment and earnings are positively correlated but not jointly determined. The dummy variable Female was included to account for gender. Lastly the variables for age and age^2 were included, age^2 was included to account for the no linearity of the relationship between earnings and age. This constructed a model of the form:
+For our analysis we have chosen to perform a series of multiple regression analyses using OLS estimators. For this analysis we used a logarithmic transformation of the dependent variable, earnings. Even though there was no evidence of heteroscedasticity we chose to use log(earnings) because conceptually percentage changes across our independent variables makes more sense. Next, we addressed variable selection. To address the first research question that the effect of internet access to person's earning, the most interested variable which was included as the dummy variable was Free Access. Since we removed the observations of "Paid Access" and "N/A" from the sample. The reference category for Free Access was No Access in our model. The other factors which we believed would impact on people's earning were race, gender, age, and education. So, we included the categorical variables of race as Black and Hispanic with White as the reference category, Female with Male as reference category, High School Diploma or GED, Some College, Undergraduate Degree or Higher with no High School Diploma as the reference category. The variables for age and age^2 were included, age^2 was included to account for the no linearity of the relationship between earnings and age. 
+
+To address our second research question of if the penalty or premium from internet assess vary by race, we remove the categorical variable of Hispanic and Black and stratified the data set by race - Black, Hispanic, White. In the second model, we compare the change of premium/penalty from Free Internet Access on difference races. 
+
+This constructed a model of the form:
+
+Model for research question 1: 
+\[
+\log(wage) = \beta_0 + \beta_1FreeAccess + \beta_2Hispanic + \beta_3Black + \beta_4Female + \beta_5Age(Years) + \beta_6Age^{2} +\mu
+\]
+
+Model for research question 2: 
+\[
+\log(wage) = \beta_0 + \beta_1FreeAccess + \beta_4Female + \beta_5Age(Years) + \beta_6Age^{2} +\mu
+\]
+
 
 
 
