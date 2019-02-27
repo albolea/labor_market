@@ -166,6 +166,7 @@ stargazer(as.data.frame(base_access), title = "Free Access",
 	          covariate.labels=c("Age (years)","Earnings (dollars)"),
 	          header = FALSE, summary = TRUE, digits = 2)
 ```
+&nbsp;
 
 __Table of Descriptive Statistics for No Internet Access__
 
@@ -182,15 +183,17 @@ __Modeling Approach__
 For our analysis we have chosen to construct four multiple regression analyses using OLS estimators with a logarithmic transformation of the dependent variable, earnings. Even though there was no evidence of heteroscedasticity we chose to use log(earnings) because conceptually percentage changes across our independent variables are easier to interpret. To address the first research question regarding the effect of access to the internet on earnings, the variable of the most interest was included as the dummy variable Free Access, with the reference category of No Access. The other factors impacting people's earning were race, gender, age, and educational attainment, to account for them we included the categorical variables of race as Black and Hispanic with White as the reference category, Female with Male as reference category, and High School Diploma or GED, Some College, Undergraduate Degree or Higher with no High School Diploma as the reference category. In regards to age, we also included age^2 as a variable to account for the nonlinearity of the relationship between earnings and age. The resulting model was of the form:
 &nbsp;
 \[
-\log(earnings) = \beta_0 + \beta_1FreeAccess + \beta_2Hispanic + \beta_3Black + \beta_4Female + \beta_5Age(Years) + \beta_6Age^{2} + \beta_7High School Diploma or GED + \beta_8Some College + \beta_9Undergraduate Degree or Higher + \mu
-\]
-&nbsp;
+\log(earnings) = \beta_0 + \beta_1FreeAccess + \beta_2Hispanic + \beta_3Black + \beta_4Female + \beta_5Age(Years) +\]
+\[\beta_6Age^{2} + \beta_7High School Diploma or GED + \beta_8Some College + \beta_9Undergraduate Degree or Higher + \mu\]
+\
+
 In order to examine if the relationship between access to the internet and earnings varied by race we stratified the data by race consequently removing the categorical variables of race from the model. The comparison between the three resulting models helps us determine if the premium or penalty for having free internet access varies across the three selected ethnic groups in Alabama. Three models where constructed for each race in the following form:
 &nbsp;
 \[
-\log(earnings)(race) = \beta_0 + \beta_1FreeAccess + \beta_4Female + \beta_5Age(Years) + \beta_6Age^{2} + \beta_7High School Diploma or GED + \beta_8Some College + \beta_9Undergraduate Degree or Higher + \mu
-\]
-&nbsp;
+\log(earnings)(race) = \beta_0 + \beta_1FreeAccess + \beta_4Female + \beta_5Age(Years)\]
+\[+ \beta_6Age^{2} + \beta_7High School Diploma or GED + \beta_8Some College + \beta_9Undergraduate Degree or Higher + \mu\]
+\
+
 It is worth noting that a Breusch-Pagan-Godfrey test was performed on all four models to test for homoscedasticity. The general and White models both fail to reject the null hypothesis of homoscedasticity. However, the Hispanic and Black models both reject the null hypothesis of homoscedasticity at 1% and 10% respectively. Since we already did a logarithmic transformation on earnings the robust standard errors were calculated and included in Black and Hispanic models along with the adjusted F-statistic in Table 4.
 
 
