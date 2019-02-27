@@ -18,7 +18,7 @@ In today’s society, reliable access to the internet has become something that 
 
 As more policy makers begin to embrace the idea of free unrestricted internet access as a modern human right, it is becoming increasingly important that they understand the effects of such policies both socially and economically. If providing free access to the internet can increase an individual’s earnings and in turn raise their economic wellbeing then such policies should engender broad support. However, more importantly, if they can also have a positive impact on racial groups historically disadvantaged by systemic racism and economic oppression then they could be a significant tool in the efforts to close the racial income gap. Access to the internet can give these disadvantaged groups the tools necessary to search for and apply for better paying jobs as well as learn new skills and earn certifications in growing industries. In states like Alabama where the median household income is among the lowest in the country at only US$45,182\footnote{U.S. Census Bureau. 2018. Quick Facts: Alabama. https://www.census.gov/quickfacts/al} and where a history of racial inequality has resulted in an income gap of approximately 10.2% it is of the utmost importance that policy makers pursue not only good intentioned but well-informed programs. Due to limited resources, federal and state governments cannot afford to undertake every initiative that seems reasonable, so studies that examine the real impact of these proposals are very important. Current programs like the FCC’s Lifeline Program\footnote{Federal Communications Commission. 2018. Lifeline Program for Low-Income Consumers. https://www.fcc.gov/general/lifeline-program-low-income-consumers} which subsidizes broadband services for the poor are woefully underfunded and offer a mere $9.25 per month for internet service, if studies can show a substantial economic benefit from investing in such programs then perhaps they will expand and be more effective moving forward. 
 
-In order to address our research questions in the context of these policy challenges we will be estimating four different earnings models. All of the models will be estimated by preforming a multiple regression analysis using ordinary least squares (OLS) estimators. The first model will be addressing whether or not access to the internet effects earnings for our whole sample. While the other three models will be modeled on stratified data using the categorical covariate race in order to identify interactions between our categorical covariate and the other variables, particularly access to the internet. Then by interpreting our results we hope to garner some evidence of a relationship between access to the internet and earnings so that we can offer a clearer perspective on public policy and the right to internet access.
+In order to address our research questions in the context of these policy challenges we will be estimating four different earnings models. All of the models will be estimated by preforming a multiple regression analysis using ordinary least squares (OLS) estimators. The first model will be addressing whether or not access to the internet effects earnings for our whole sample. While the other three models will be modeled on stratified data using the categorical covariate race in order to identify interactions between our categorical covariate and the other variables, particularly access to the internet. Then by interpreting our results we can show that there is evidence of a positive relationship between access to the internet and earnings especially for Black individuals. These findings will be the basis for offering a clearer perspective on public policy and in order to make appropriate recommendations.
 
 
 
@@ -51,6 +51,12 @@ if(!require(stargazer)){
   install.packages("stargazer")
 }
 library(stargazer)
+
+if(!require(sandwich)){
+  install.packages("sandwich")
+}
+library(sandwich)
+
 library(kableExtra)
 
 
@@ -218,40 +224,54 @@ base_model <- base_model %>% mutate(ln_earnings = log(WAGP))
 model_04 <- lm(ln_earnings ~ free_access + hispanic + black + female + AGEP + I(AGEP^2) +
                  high_school_GED + some_college + undergrad_or_higher, data = base_model)
 
+base_model.white <- filter(base_model,white == TRUE)
+base_model.black <- filter(base_model,black == TRUE)
+base_model.hispanic <- filter(base_model,hispanic == TRUE)
+
 model_white<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
-                 high_school_GED + some_college + undergrad_or_higher, 
-               data = filter(base_model,white == TRUE))
+                   high_school_GED + some_college + undergrad_or_higher, 
+                 data = base_model.white)
 
 model_black<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
-                 high_school_GED + some_college + undergrad_or_higher, 
-               data = filter(base_model,black == TRUE))
+                   high_school_GED + some_college + undergrad_or_higher, 
+                 data = base_model.black)
 
 model_hispanic<- lm(ln_earnings ~ free_access+female + AGEP + I(AGEP^2) +
-                 high_school_GED + some_college + undergrad_or_higher, 
-               data = filter(base_model,hispanic == TRUE))
+                      high_school_GED + some_college + undergrad_or_higher, 
+                    data = base_model.hispanic)
+
+
+# Adjust standard errors
+cov1 <- vcovHC(model_black,type = "HC1") 
+black_robust_se <- sqrt(diag(cov1))
+# Adjust F statistic 
+wald_results <- waldtest(model_black, vcov = cov1)
+wald_results
+
+cov1 <- vcovHC(model_hispanic,type = "HC1") 
+hispanic_robust_se <- sqrt(diag(cov1))
 ```
 &nbsp;
 
+\pagebreak
 
 __Empirical Results__
 
 Table 3 presents the estimate for our log earnings equation for the whole sample. The estimates suggest that earnings are positively associated with educational attainment, both of which is expected, and this relationship is highly economically and statistically significant at the 1% level across each educational variable controlling for all other variables. Age is also positively associated with earnings, until the age of approximately 52 years old when earnings begin to decrease. As expected, earnings are also negatively associated with being female or black. Controlling for all other variables our estimate suggests that a black person will make 13.15% less than a white person on average. This is both a statistically significant finding at the 1% level and is economically significant because it illustrates the problem of racial inequality in earnings. If we look at the free access coefficient we can see that controlling for all other variables, free internet access leads to a 10.5% premium in earnings on average over having no internet access. This result is statistically significant at the 5% level and is also highly economically significant. We can argue with some confidence that, based on our estimated log earnings equation, earnings are positively associated with having free access to the internet. This is an important finding for our research and leads us into the second part of our analysis; does this effect vary across races?
 
-&nbsp;
+\pagebreak
 
 ```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE}
 stargazer(model_04, title="Results", 
           covariate.labels = c("Free Access", "Hispanic", "Black",
                                "Female", "Age (Years)", "Age Squared", "High School Diploma or GED",
                                "Some College", "Undergraduate Degree or Higher"),
+          font.size = "small",
           header = FALSE)
 
 ```
-&nbsp;
 
 Table 4 presents the three estimated log earnings equations on the stratified data, each estimated for a different race. When we examine the Free Access coefficient we can see that, controlling for all other variables, there is on average a 19% earnings premium for Black individuals with free access over having no access at all. This result is statistically significant at the 5% level and is extremely economically significant. For white people controlling for all other variables there is only a 5.65% premium on average for having free access, but this finding is not statistically significant not even at the level of 10% nor is it economically significant. For Hispanics almost all of the coefficients are not statistically significant at any level, more than likely due to the small sample size of 78 observations. 
-
-&nbsp;
 
 ```{r, results='asis', echo=FALSE, error=FALSE, warning=FALSE}
 stargazer(model_white, model_black, model_hispanic, 
@@ -260,7 +280,9 @@ stargazer(model_white, model_black, model_hispanic,
                                "High School Diploma or GED", "Some College", 
                                "Undergraduate Degree or Higher"),
           column.labels = c("White", "Black", "Hispanic"),
-          header = FALSE)
+          se = list(NULL, black_robust_se, hispanic_robust_se),
+          header = FALSE,
+          font.size = "small")
 ```
 &nbsp;
 
